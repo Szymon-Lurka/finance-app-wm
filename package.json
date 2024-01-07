@@ -1,0 +1,11 @@
+{
+  "name": "finance-wm",
+  "version": "1.0.0",
+  "description": "Application aka. finance manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SL, MD, WM",
+  "license": "ISC"
+}
