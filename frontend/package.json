@@ -4,12 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "dev": "env-cmd -e local -r .env-cmdrc vite",
+    "build-prod": "env-cmd -e production -r .env-cmdrc vite build --mode production",
     "preview": "vite preview"
   },
   "dependencies": {
     "axios": "^1.6.5",
+    "env-cmd": "^10.1.0",
     "pinia": "^2.1.7",
     "sass": "^1.69.7",
     "vue": "^3.3.11",
