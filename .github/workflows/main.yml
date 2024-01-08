@@ -19,5 +19,5 @@ jobs:
           cd /var/www/finance-app-wm
           git pull origin main
           git status
-          cd /backend
+          cd ./backend
           npm install --only-prod
