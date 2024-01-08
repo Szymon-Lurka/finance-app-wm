@@ -2,12 +2,12 @@ name: Deploy
 on:
   push:
     branches: [ main ]
-    paths:
-      - '../frontend'
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Check frontend
+      run: ls -R ../frontend
     - name: Deploy backend
       uses: appleboy/ssh-action@master
       with:
