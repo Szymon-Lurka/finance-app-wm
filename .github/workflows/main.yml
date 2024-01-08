@@ -22,3 +22,5 @@ jobs:
           git pull origin main
           cd ./backend
           bash start_container.sh
+    - name: Wait for docker to finish building
+      run: sleep 30
