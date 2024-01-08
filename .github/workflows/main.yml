@@ -8,7 +8,7 @@ jobs:
     steps:
     - name: Check frontend
       run: |
-        ls -R
+        ls -l
     - name: Deploy backend
       uses: appleboy/ssh-action@master
       with:
