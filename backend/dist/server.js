@@ -1,4 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-console.log("Hey TS!");
-//# sourceMappingURL=server.js.map
+const express_1 = __importDefault(require("express"));
+const app = (0, express_1.default)();
+app.get('/', (req, res) => {
+    res.json({ status: 'success', data: [1, 2, 3, 4, 5] });
+});
+app.listen(3001, () => {
+    console.log('Listening on 3001...');
+});
