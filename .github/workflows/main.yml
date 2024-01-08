@@ -21,6 +21,4 @@ jobs:
           git pull origin main
           git status
           cd ./backend
-          docker compose -f docker-compose.yml up --build &
-    - name: Finish action
-      run: exit 0
+          bash basic_script.sh
