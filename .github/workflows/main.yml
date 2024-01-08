@@ -23,6 +23,7 @@ jobs:
           cd ./backend
           bash start_container.sh
           cd ..
+          cd ./frontend
           docker stop frontend
           docker build . -t frontend
           docker run -d -p 8080:8080 --rm --name frontend frontend
