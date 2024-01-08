@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Deploy using ssh
+    - name: Deploy backend
       uses: appleboy/ssh-action@master
       with:
         host: ${{secrets.HOST}}
@@ -22,7 +22,18 @@ jobs:
           git pull origin main
           cd ./backend
           bash start_container.sh
-          cd ..
+    - name: Deploy frontend
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{secrets.HOST}}
+        username: ${{secrets.USERNAME}}
+        key: ${{secrets.SSH_PRIVATE_KEY}}
+        port: 22
+        script: |
+          cd /var/www/finance-app-wm
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/szymon-gh
+          git pull origin main
           cd ./frontend
           docker stop frontend
           docker build . -t frontend
