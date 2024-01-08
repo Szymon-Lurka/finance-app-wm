@@ -22,5 +22,9 @@ jobs:
           git pull origin main
           cd ./backend
           bash start_container.sh
+          cd ..
+          docker stop frontend
+          docker build . -t frontend
+          docker run -d -p 8080:8080 --rm --name frontend frontend
     - name: Wait for docker to finish building
       run: sleep 30
