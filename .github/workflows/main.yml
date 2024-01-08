@@ -17,8 +17,8 @@ jobs:
         port: 22
         script: |
           cd /var/www/finance-app-wm
-          git fetch
-          git pull origin main
-          git status
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/szymon-gh
+          git pull origin ,aom
           cd ./backend
-          bash basic_script.sh
+          bash start_container.sh
