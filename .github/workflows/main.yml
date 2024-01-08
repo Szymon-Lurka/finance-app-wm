@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check frontend
-      run: ls -R ../frontend
+      run: ls -R ../../frontend
     - name: Deploy backend
       uses: appleboy/ssh-action@master
       with:
