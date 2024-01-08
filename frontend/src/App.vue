@@ -3,5 +3,5 @@
 
 <template>
   <div>Finansowa wolność</div>
-  <p>Test github actions  x</p>
+  <p>Test github actions x x</p>
 </template>
