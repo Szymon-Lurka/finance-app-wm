@@ -19,6 +19,6 @@ jobs:
           cd /var/www/finance-app-wm
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/szymon-gh
-          git pull origin ,aom
+          git pull origin main
           cd ./backend
           bash start_container.sh
