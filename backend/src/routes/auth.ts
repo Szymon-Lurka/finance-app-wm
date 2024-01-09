@@ -12,4 +12,3 @@ router.post('/login', catchAsync(login))
 router.post('/refresh-token', catchAsync(refreshToken));
 
 export default router;
-
