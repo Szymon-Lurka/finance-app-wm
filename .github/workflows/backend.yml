@@ -21,6 +21,7 @@ jobs:
             ssh-add ~/.ssh/szymon-gh
             git pull origin main
             cd ./backend
+            echo ${{secrets.BACKEND_DEV}} > .env
             bash start_container.sh
       - name: Wait for docker to finish building
         run: sleep 30
