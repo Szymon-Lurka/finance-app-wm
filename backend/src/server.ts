@@ -1,11 +1,45 @@
-import express, {Application} from 'express';
+import {NextFunction, Request, Response} from 'express';
 
-const app = express();
+import router from "./routes/auth";
+import errorHandler from "./controllers/errorController";
+import initializeApp from "./initialize";
+import {BaseError} from "./utils/errors/AppError";
+import verifyToken from "./middleware/authMiddleware";
+import catchAsync from "./utils/errors/catchAsync";
 
-app.get('/', (req, res) => {
-    res.json({status: 'success', data: [1, 2, 3, 4, 5]});
+const app = initializeApp();
+
+const PORT = process.env.PORT;
+
+app.use('/api/v1/auth', router);
+
+app.get('/', verifyToken, catchAsync(async (req: Request, res: Response) => {
+    console.log('inside');
+    res.status(200).json({status:' XD'});
+    // res.json({status: 'XDXD'});
+}))
+
+// Must be the last one to handle ALL errors!
+// It MUST have 4 parameters: err,req,res,next - otherwise this handler won't fire
+app.use(async (err: BaseError, req: Request, res: Response, next: NextFunction) => {
+    errorHandler(err, req, res);
 })
 
-app.listen(3001, () => {
-    console.log('Listening on 3001...');
+const server = app.listen(PORT, () => {
+    console.log(`Listening on PORT: ${PORT}`);
 })
+
+
+process.on('uncaughtException', (err: any) => {
+    console.log('UNCAUGHT EXCEPTION! Shutting down...');
+    console.log(err.name, err.message);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (err: any) => {
+    console.log('UNHANDLED REJECTION! Shutting down...');
+    console.log(err.name, err.message);
+    server.close(() => {
+        process.exit(1);
+    });
+});
