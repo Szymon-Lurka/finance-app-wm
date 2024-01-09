@@ -13,15 +13,10 @@ const PORT = process.env.PORT;
 
 app.use('/api/v1/auth', router);
 
-app.get('/', verifyToken, catchAsync(async (req: Request, res: Response) => {
-    console.log('inside');
-    res.status(200).json({status:' XD'});
-    // res.json({status: 'XDXD'});
-}))
-
 // Must be the last one to handle ALL errors!
 // It MUST have 4 parameters: err,req,res,next - otherwise this handler won't fire
 app.use(async (err: BaseError, req: Request, res: Response, next: NextFunction) => {
+    console.log(err);
     errorHandler(err, req, res);
 })
 
