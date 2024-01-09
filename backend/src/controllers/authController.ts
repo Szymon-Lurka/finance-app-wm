@@ -52,7 +52,7 @@ const login = async (req: CustomRequest<LoginUserBody>, res: Response, next: Nex
     const {username, email, password} = req.body;
     const user = await User.findOne(username ? {username} : {email}).select('+password');
     if (!user) {
-        next(new NotFoundError('Not found', 'User not exists'));
+        return next(new NotFoundError('Not found', 'User not exists'));
     }
 
     if (!password || !user || !(await bcrypt.compare(password, user.password as string))) {
