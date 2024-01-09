@@ -1,7 +1,9 @@
 import axios from "axios";
 
+
+console.log(import.meta.env);
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:3001',
+    baseURL: import.meta.env.VITE_APP_API_BASE_URL,
     validateStatus: (status) => status >= 200 && status < 300
 })
 
