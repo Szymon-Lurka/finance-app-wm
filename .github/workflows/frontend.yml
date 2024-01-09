@@ -1,0 +1,26 @@
+name: Deploy frontend
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - frontend/**
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy frontend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSH_PRIVATE_KEY}}
+          port: 22
+          script: |
+            cd /var/www/finance-app-wm
+            eval "$(ssh-agent -s)"
+            ssh-add ~/.ssh/szymon-gh
+            git pull origin main
+            cd ./frontend
+            docker stop frontend
+            docker build . -t frontend
+            docker run -d -p 8080:8080 --rm --name frontend frontend
