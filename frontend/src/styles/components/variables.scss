@@ -1,0 +1,11 @@
+html {
+  &.dark {
+    color-scheme: dark;
+    --color-primary: white;
+  }
+}
+
+:root {
+  color-scheme: light;
+  --color-primary: black;
+}
