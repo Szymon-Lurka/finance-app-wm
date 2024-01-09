@@ -1,7 +1,7 @@
 import {Response} from "express";
-import {IUser} from "../../types/models/Auth";
 import jwt from 'jsonwebtoken';
 import User from "../../models/User";
+import {IUser} from "../../types/models/User";
 
 const createResetPasswordToken = (email: string) => jwt.sign({email}, process.env.JWT_SECRET_KEY || '', {expiresIn: process.env.RESET_PASSWORD_EXPIRES_IN});
 const signToken = (id: string) =>
