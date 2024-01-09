@@ -6,8 +6,23 @@ interface UserBody {
     firstName: string;
 }
 
+interface GetQuestionBody {
+    email: string;
+}
+
+interface ResetPasswordBody {
+    token: string;
+    newPassword: string;
+    email: string;
+}
+interface ForgotPasswordBody {
+    email: string;
+    answer: string;
+}
+
 interface JWTBody {
-    id: string;
+    id?: string;
+    email?: string;
 }
 interface IUser {
     username: string;
@@ -16,6 +31,7 @@ interface IUser {
     lastName: string;
     email: string;
     refreshToken: string | null | undefined;
+    resetPasswordToken: string | null | undefined;
     _id: string;
 }
 
@@ -34,5 +50,8 @@ export {
     LoginUserBody,
     IUser,
     RefreshTokenBody,
-    JWTBody
+    JWTBody,
+    ForgotPasswordBody,
+    GetQuestionBody,
+    ResetPasswordBody,
 }

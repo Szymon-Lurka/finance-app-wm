@@ -15,8 +15,11 @@ const userSchema = new Schema<IUser>({
         lowercase: true,
         validate: [validator.isEmail, 'Please provide valid email!']
     },
-    refreshToken: {type: String, required: false, select: false}
+    refreshToken: {type: String, required: false, select: false},
+    resetPasswordToken: {type: String, required: false, select: false}
 })
+
+
 
 const User = model<IUser>('User', userSchema);
 export default User;

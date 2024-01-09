@@ -1,20 +1,104 @@
-import {Response} from "express";
+import {NextFunction, Response} from "express";
 import {CustomRequest} from "../types/models/Request";
-import {LoginUserBody, RefreshTokenBody, UserBody} from "../types/models/Auth";
-import {NextFunction} from "express";
+import {ForgotPasswordBody, LoginUserBody, RefreshTokenBody, ResetPasswordBody, UserBody} from "../types/models/Auth";
 import {
+    BaseError,
     BodyFieldsValidationError,
     createMongoDBError,
-    NotFoundError, UnauthorizedError, ValidationError
+    NotFoundError,
+    UnauthorizedError,
+    ValidationError
 } from "../utils/errors/AppError";
 import {PASSWORD_VALIDATION_REGEX} from "../constants/regexes";
 import bcrypt from "bcryptjs";
 import User from "../models/User";
 import {decodeJWT} from "../utils/tokens/decodeJWT";
-import {createJWT} from "../utils/tokens/createTokens";
+import {createJWT, createResetPasswordToken} from "../utils/tokens/createTokens";
 import errors from "../constants/errors";
 import {validateRegisterBody} from "../utils/validators/authValidators";
 import {messages} from "../constants/messages";
+import handlebars from "handlebars";
+import {getResetPasswordTemplate, nodemailerSetup} from "../utils/email/nodemailerSetup";
+import {HttpStatusCode} from "../types/enums/HttpStatusCode";
+
+const forgotPassword = async (req: CustomRequest<ForgotPasswordBody>, res: Response, next: NextFunction) => {
+    const {email} = req.body;
+
+    if (!email) {
+        return next(new BodyFieldsValidationError('Forgot password email', ['email']))
+    }
+
+    const resetPasswordToken = createResetPasswordToken(email);
+    const user = await User.findOneAndUpdate({email}, {resetPasswordToken});
+    if (!user) {
+        return next(new NotFoundError('Not found', 'User with provided email doesn\'t exists.'));
+    }
+
+    const templateFile = getResetPasswordTemplate();
+    const template = handlebars.compile(templateFile);
+    const data = {link: `${process.env.CLIENT_URL}/forgot-password/${resetPasswordToken}`, name: user.firstName};
+
+    const mailOptions = {
+        from: process.env.NODEMAILER_OPT_MAIL,
+        to: user.email,
+        subject: 'Resetowanie hasła',
+        html: template(data),
+    }
+
+    const transporter = nodemailerSetup();
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Error mail', error);
+            return next(new BaseError('Forgot password', HttpStatusCode.INTERNAL_SERVER, '', true));
+        } else {
+            console.log('Email sent: ', info.response);
+            res.status(201).send({
+                status: 'success',
+                message: 'Email sent successfully!'
+            });
+        }
+    })
+};
+
+const resetPassword = async (req: CustomRequest<ResetPasswordBody>, res: Response, next: NextFunction) => {
+    const {token, newPassword, email} = req.body;
+
+    if (!token) {
+        return next(new BodyFieldsValidationError('Wrong reset password token', ['token']))
+    }
+
+    if (!email) {
+        return next(new BodyFieldsValidationError('Wrong resed password email', ['email']))
+    }
+
+    if (!newPassword || !PASSWORD_VALIDATION_REGEX.test(newPassword)) {
+        return next(new ValidationError('Wrong password reset password', errors.auth.password))
+    }
+
+    const user = await User.findOne({email}).select('+resetPasswordToken');
+
+    if (!user) {
+        return next(new NotFoundError('Not found', 'User with provided email doesn\'t exists.'));
+    }
+
+    if (user.resetPasswordToken !== token) {
+        user.resetPasswordToken = null;
+        await user.save();
+        return next(new ValidationError('Wrong token reset password', 'Token for password reset is incorrect.'))
+    }
+
+    decodeJWT(token);
+
+    // Everything is ok, so we're saving new password and deleting resetPasswordToken
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordToken = null;
+    await user.save();
+
+    res.status(201).json({
+        status: 'success',
+        message: 'Successfully changed password'
+    })
+}
 
 const register = async (req: CustomRequest<UserBody>, res: Response, next: NextFunction) => {
     const {username, password, email, lastName, firstName} = req.body;
@@ -90,4 +174,6 @@ export {
     register,
     refreshToken,
     login,
+    forgotPassword,
+    resetPassword,
 }

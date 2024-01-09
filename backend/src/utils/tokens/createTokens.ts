@@ -3,6 +3,7 @@ import {IUser} from "../../types/models/Auth";
 import jwt from 'jsonwebtoken';
 import User from "../../models/User";
 
+const createResetPasswordToken = (email: string) => jwt.sign({email}, process.env.JWT_SECRET_KEY || '', {expiresIn: process.env.RESET_PASSWORD_EXPIRES_IN});
 const signToken = (id: string) =>
     jwt.sign({id}, process.env.JWT_SECRET_KEY || '', {
         expiresIn: process.env.JWT_EXPIRES_IN
@@ -30,5 +31,6 @@ const createJWT = async (user: IUser, statusCode: number, res: Response) => {
 }
 
 export {
-    createJWT
+    createJWT,
+    createResetPasswordToken
 }
