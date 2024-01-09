@@ -4,7 +4,6 @@ import router from "./routes/auth";
 import errorHandler from "./controllers/errorController";
 import initializeApp from "./initialize";
 import {BaseError} from "./utils/errors/AppError";
-import nodemailer from 'nodemailer';
 
 const app = initializeApp();
 
