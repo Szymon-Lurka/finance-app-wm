@@ -11,10 +11,4 @@ router.post('/login', catchAsync(login))
 
 router.post('/refresh-token', catchAsync(refreshToken));
 
-//@ts-ignore
-router.get('/xd', verifyToken, (req, res) => {
-//@ts-ignore
-    res.status(200).json({status: 'nokurwa'});
-})
-
 export default router;
