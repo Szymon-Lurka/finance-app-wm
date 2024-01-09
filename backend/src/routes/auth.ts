@@ -1,7 +1,6 @@
 import express from 'express';
 import catchAsync from "../utils/errors/catchAsync";
 import {forgotPassword, login, refreshToken, register, resetPassword} from "../controllers/authController";
-import verifyToken from "../middleware/authMiddleware";
 
 const router = express.Router();
 

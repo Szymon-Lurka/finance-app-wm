@@ -1,6 +1,6 @@
 import {NextFunction, Response} from "express";
 import {CustomRequest} from "../types/models/Request";
-import {ForgotPasswordBody, LoginUserBody, RefreshTokenBody, ResetPasswordBody, UserBody} from "../types/models/Auth";
+import {ForgotPasswordBody, LoginUserBody, RefreshTokenBody, ResetPasswordBody} from "../types/models/Auth";
 import {
     BaseError,
     BodyFieldsValidationError,
@@ -20,6 +20,7 @@ import {messages} from "../constants/messages";
 import handlebars from "handlebars";
 import {getResetPasswordTemplate, nodemailerSetup} from "../utils/email/nodemailerSetup";
 import {HttpStatusCode} from "../types/enums/HttpStatusCode";
+import {UserBody} from "../types/models/User";
 
 const forgotPassword = async (req: CustomRequest<ForgotPasswordBody>, res: Response, next: NextFunction) => {
     const {email} = req.body;

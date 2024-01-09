@@ -1,4 +1,4 @@
-import {LoginUserBody, UserBody} from "../../types/models/Auth";
+import {UserBody} from "../../types/models/User";
 
 const isEmpty = (val: unknown) => val === '' || val === null || val === undefined || typeof val === 'number';
 const validateRegisterBody = (body: UserBody) => {

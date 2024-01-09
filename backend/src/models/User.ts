@@ -1,6 +1,6 @@
 import {Schema, model} from 'mongoose';
 import validator from 'validator';
-import {IUser} from "../types/models/Auth";
+import {IUser} from "../types/models/User";
 
 
 const userSchema = new Schema<IUser>({
