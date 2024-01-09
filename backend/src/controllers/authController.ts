@@ -25,7 +25,8 @@ const register = async (req: CustomRequest<UserBody>, res: Response, next: NextF
         lastName,
         firstName
     });
-    if (!username || !password || !email || !lastName || !firstName) {
+
+    if (invalidFields.length > 0) {
         return next(new BodyFieldsValidationError('Register wrong data', invalidFields))
     }
 

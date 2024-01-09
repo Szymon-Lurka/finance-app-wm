@@ -32,7 +32,6 @@ const verifyToken = catchAsync(async (req: CustomRequest<{}, {
         )
     }
     req.user = freshUser as any;
-    console.log('auth');
     next();
 })
 
