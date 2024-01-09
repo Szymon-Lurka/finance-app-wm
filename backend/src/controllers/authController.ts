@@ -61,21 +61,20 @@ const forgotPassword = async (req: CustomRequest<ForgotPasswordBody>, res: Respo
 };
 
 const resetPassword = async (req: CustomRequest<ResetPasswordBody>, res: Response, next: NextFunction) => {
-    const {token, newPassword, email} = req.body;
+    const {token, newPassword} = req.body;
 
     if (!token) {
         return next(new BodyFieldsValidationError('Wrong reset password token', ['token']))
-    }
-
-    if (!email) {
-        return next(new BodyFieldsValidationError('Wrong resed password email', ['email']))
     }
 
     if (!newPassword || !PASSWORD_VALIDATION_REGEX.test(newPassword)) {
         return next(new ValidationError('Wrong password reset password', errors.auth.password))
     }
 
-    const user = await User.findOne({email}).select('+resetPasswordToken');
+    const decodedToken = decodeJWT(token);
+    const userEmail = decodedToken?.email;
+
+    const user = await User.findOne({email: userEmail}).select('+resetPasswordToken');
 
     if (!user) {
         return next(new NotFoundError('Not found', 'User with provided email doesn\'t exists.'));

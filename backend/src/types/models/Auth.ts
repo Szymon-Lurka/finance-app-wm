@@ -13,7 +13,6 @@ interface GetQuestionBody {
 interface ResetPasswordBody {
     token: string;
     newPassword: string;
-    email: string;
 }
 interface ForgotPasswordBody {
     email: string;
