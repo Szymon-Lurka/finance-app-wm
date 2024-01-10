@@ -1,15 +1,17 @@
-import {LoginUserBody, UserBody} from "../../types/models/Auth";
+import {UserBody} from "../../types/models/User";
+import {isEmpty} from "../tools/validatorTools";
 
-const isEmpty = (val: unknown) => val === '' || val === null || val === undefined || typeof val === 'number';
 const validateRegisterBody = (body: UserBody) => {
     const invalidFields: string[] = [];
-    Object.keys(body).forEach((key) => {
-        // @ts-ignore
-        const val = body[key];
-        if (isEmpty(val) || typeof val === 'number') {
-            invalidFields.push(key);
-        }
-    })
+    if (isEmpty(body.username)) {
+        invalidFields.push('username')
+    }
+    if (isEmpty(body.firstName)) {
+        invalidFields.push('firstName')
+    }
+    if (isEmpty(body.lastName)) {
+        invalidFields.push('lastName')
+    }
     return invalidFields;
 };
 

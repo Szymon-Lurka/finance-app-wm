@@ -1,6 +1,6 @@
 import {Schema, model} from 'mongoose';
 import validator from 'validator';
-import {IUser} from "../types/models/Auth";
+import {IUser} from "../types/models/User";
 
 
 const userSchema = new Schema<IUser>({
@@ -16,9 +16,11 @@ const userSchema = new Schema<IUser>({
         validate: [validator.isEmail, 'Please provide valid email!']
     },
     refreshToken: {type: String, required: false, select: false},
-    resetPasswordToken: {type: String, required: false, select: false}
+    resetPasswordToken: {type: String, required: false, select: false},
+    createdAt: {type: String},
+    updatedAt: {type: String},
+    balance: {type: Number, default: 0}
 })
-
 
 
 const User = model<IUser>('User', userSchema);
