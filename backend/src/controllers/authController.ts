@@ -119,9 +119,10 @@ const register = async (req: CustomRequest<UserBody>, res: Response, next: NextF
         return next(new ValidationError('Wrong password', errors.auth.password))
     }
     const hashedPassword = await bcrypt.hash(password, 10);
+    const createdAt = new Date().toISOString();
 
     try {
-        const user = new User({username, password: hashedPassword, email, firstName, lastName});
+        const user = new User({username, password: hashedPassword, email, firstName, lastName, createdAt});
         await user.save();
     } catch (e) {
         next(createMongoDBError(e));

@@ -2,6 +2,7 @@ import {NextFunction, Request, Response} from 'express';
 
 import authRouter from "./routes/auth";
 import userRouter from './routes/user';
+import categoriesRouter from './routes/categories';
 import errorHandler from "./controllers/errorController";
 import initializeApp from "./initialize";
 import {BaseError} from "./utils/errors/AppError";
@@ -12,6 +13,7 @@ const PORT = process.env.PORT;
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
+app.use('/api/v1/categories', categoriesRouter);
 
 // Must be the last one to handle ALL errors!
 // It MUST have 4 parameters: err,req,res,next - otherwise this handler won't fire

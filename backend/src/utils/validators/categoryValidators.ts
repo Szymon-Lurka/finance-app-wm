@@ -1,7 +1,7 @@
-import {UserBody} from "../../types/models/User";
+import {AddCategoryBody} from "../../types/models/Category";
 import {isEmpty} from "../tools/validatorTools";
 
-const validateRegisterBody = (body: UserBody) => {
+const validateCategoryBody = (body: AddCategoryBody) => {
     const invalidFields: string[] = [];
     Object.keys(body).forEach((key) => {
         // @ts-ignore
@@ -11,8 +11,8 @@ const validateRegisterBody = (body: UserBody) => {
         }
     })
     return invalidFields;
-};
+}
 
 export {
-    validateRegisterBody,
+    validateCategoryBody
 }
