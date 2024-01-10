@@ -24,7 +24,7 @@ import {UserBody} from "../types/models/User";
 import FinancialEntry from "../models/FinancialEntry";
 import * as mongoose from "mongoose";
 
-const forgotPassword = async (req: CustomRequest<ForgotPasswordBody>, res: Response, next: NextFunction) => {
+const forgotPassword = async (req: CustomRequest<{}, ForgotPasswordBody>, res: Response, next: NextFunction) => {
     const {email} = req.body;
 
     if (!email) {
@@ -63,7 +63,7 @@ const forgotPassword = async (req: CustomRequest<ForgotPasswordBody>, res: Respo
     })
 };
 
-const resetPassword = async (req: CustomRequest<ResetPasswordBody>, res: Response, next: NextFunction) => {
+const resetPassword = async (req: CustomRequest<{}, ResetPasswordBody>, res: Response, next: NextFunction) => {
     const {token, newPassword} = req.body;
 
     if (!token) {
@@ -102,7 +102,7 @@ const resetPassword = async (req: CustomRequest<ResetPasswordBody>, res: Respons
     })
 }
 
-const register = async (req: CustomRequest<UserBody>, res: Response, next: NextFunction) => {
+const register = async (req: CustomRequest<{}, UserBody>, res: Response, next: NextFunction) => {
     const {username, password, email, lastName, firstName} = req.body;
     const invalidFields = validateRegisterBody({
         username,
@@ -136,7 +136,7 @@ const register = async (req: CustomRequest<UserBody>, res: Response, next: NextF
     })
 }
 
-const login = async (req: CustomRequest<LoginUserBody>, res: Response, next: NextFunction) => {
+const login = async (req: CustomRequest<{}, LoginUserBody>, res: Response, next: NextFunction) => {
     const {username, email, password} = req.body;
     const user = await User.findOne(username ? {username} : {email}).select('+password');
     if (!user) {
@@ -149,7 +149,7 @@ const login = async (req: CustomRequest<LoginUserBody>, res: Response, next: Nex
     await createJWT(user, 200, res);
 };
 
-const refreshToken = async (req: CustomRequest<RefreshTokenBody>, res: Response, next: NextFunction) => {
+const refreshToken = async (req: CustomRequest<{}, RefreshTokenBody>, res: Response, next: NextFunction) => {
     const {refreshToken} = req.body;
     if (!refreshToken) {
         return next(new UnauthorizedError('RefreshToken', errors.auth.refreshToken))

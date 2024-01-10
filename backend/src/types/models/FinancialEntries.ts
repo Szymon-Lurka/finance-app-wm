@@ -1,4 +1,5 @@
 import {Schema} from "mongoose";
+import {SharedQuery} from "./Shared";
 
 type FinancialEntryType = 'income' | 'expense';
 
@@ -14,6 +15,24 @@ interface IFinancialEntries {
     type: FinancialEntryType;
 }
 
+interface GetFinancialEntriesQuery extends SharedQuery {
+    searchText?: string;
+    type?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    amountFrom?: string;
+    amountTo?: string;
+}
+
+interface UpdateFinancialEntryBody {
+    date?: string;
+    amount?: number;
+    name?: string;
+    categoryId?: string;
+    currency?: string;
+    type?: FinancialEntryType;
+    description?: string;
+}
 
 interface AddFinancialEntryBody {
     date: string;
@@ -29,4 +48,7 @@ interface AddFinancialEntryBody {
 export {
     IFinancialEntries,
     AddFinancialEntryBody,
+    GetFinancialEntriesQuery,
+    FinancialEntryType,
+    UpdateFinancialEntryBody,
 }

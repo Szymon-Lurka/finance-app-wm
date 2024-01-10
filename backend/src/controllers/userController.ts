@@ -7,7 +7,7 @@ import {PASSWORD_VALIDATION_REGEX} from "../constants/regexes";
 import errors from "../constants/errors";
 import bcrypt from "bcryptjs";
 
-const updateUser = async (req: CustomRequest<ManageUserBody>, res: Response, next: NextFunction) => {
+const updateUser = async (req: CustomRequest<{}, ManageUserBody>, res: Response, next: NextFunction) => {
     const {firstName, lastName, password, username, currentPassword} = req.body;
     if (!currentPassword) {
         return next(new BodyFieldsValidationError('No current password provided', ['currentPassword']));

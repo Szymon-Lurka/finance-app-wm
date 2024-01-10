@@ -1,15 +1,20 @@
 import {CustomRequest} from "../types/models/Request";
 import {NextFunction, Response} from "express";
-import {AddFinancialEntryBody} from "../types/models/IncomeEntries";
-import {incomeEntriesValidator} from "../utils/validators/incomeEntriesValidator";
+import type {
+    AddFinancialEntryBody,
+    GetFinancialEntriesQuery,
+    UpdateFinancialEntryBody
+} from "../types/models/FinancialEntries";
+import {financialEntriesValidator, updateFinancialEntryValidator} from "../utils/validators/financialEntriesValidator";
 import {BodyFieldsValidationError, createMongoDBError, NotFoundError} from "../utils/errors/AppError";
 import FinancialEntry from "../models/FinancialEntry";
 import Category from "../models/Category";
 import mongoose from "mongoose";
+import {getFacets, getMatchFilters} from "../utils/api/aggregateFeatures";
 
-const addFinancialEntry = async (req: CustomRequest<AddFinancialEntryBody>, res: Response, next: NextFunction) => {
+const addFinancialEntry = async (req: CustomRequest<{}, AddFinancialEntryBody>, res: Response, next: NextFunction) => {
     const {description, name, amount, date, type, currency, categoryId} = req.body;
-    const invalidFields = incomeEntriesValidator(req.body);
+    const invalidFields = financialEntriesValidator(req.body);
     if (invalidFields.length > 0) {
         return next(new BodyFieldsValidationError('Add financial entry wrong data', invalidFields));
     }
@@ -44,45 +49,138 @@ const addFinancialEntry = async (req: CustomRequest<AddFinancialEntryBody>, res:
         }
     })
 };
-const updateFinancialEntry = async (req: CustomRequest<unknown>, res: Response, next: NextFunction) => {
+const updateFinancialEntry = async (req: CustomRequest<{
+    id: string;
+}, UpdateFinancialEntryBody>, res: Response, next: NextFunction) => {
+    const entryID = req.params.id;
+    const invalidFields = updateFinancialEntryValidator(req.body);
+    if (invalidFields.length > 0) {
+        return next(new BodyFieldsValidationError('Update financial entry wrong data', invalidFields));
+    }
+    const {
+        categoryId,
+    } = req.body;
+
+    let category;
+    if (categoryId) {
+        category = Category.findOne({_id: categoryId, userId: req.user.id})
+    }
+    if (categoryId && !category) {
+        return next(new NotFoundError('Category does not exists - update financial entry', 'Category does not exists'))
+    }
+
+    await FinancialEntry.findOneAndUpdate({_id: entryID}, req.body);
+    res.status(210).json({
+        status: 'success',
+        message: 'Successfully updated financial entry'
+    })
 };
 const deleteFinancialEntry = async (req: CustomRequest<unknown>, res: Response, next: NextFunction) => {
 };
-const getFinancialEntry = async (req: CustomRequest<unknown>, res: Response, next: NextFunction) => {
-};
-const getFinancialEntries = async (req: CustomRequest, res: Response, next: NextFunction) => {
-    const query = req.query;
-    const filter = query.filter as string || '';
-    const aggregateORMatch: any[] = [{}];
-    const financialEntries = await FinancialEntry.aggregate([
+const getFinancialEntry = async (req: CustomRequest<{ id: string; }>, res: Response, next: NextFunction) => {
+    const financialEntryID = req.params.id;
+    const entry = await FinancialEntry.aggregate([
         {
-            '$match': {
+            $match: {
                 $and: [
                     {userId: new mongoose.Types.ObjectId(req.user.id)},
-                ],
-                $or: aggregateORMatch
+                    {_id: new mongoose.Types.ObjectId(financialEntryID)}
+                ]
             },
         },
         {
-            '$sort': {
-                name: 1
+            $lookup: {
+                from: 'categories',
+                localField: 'categoryId',
+                foreignField: '_id',
+                as: 'categories'
             }
         },
         {
-            '$group': {
-                _id: '$name',
-                totalCount: {$sum: '$amount' }
-            }
+            $unwind: {path: '$categories', preserveNullAndEmptyArrays: true}
         },
-    ]).lookup({
-        from: 'categories',
-        localField: 'categoryId',
-        foreignField: '_id',
-        as: 'categories'
-    });
+    ]);
+    if (!entry) {
+        return next(new NotFoundError('Not found financial entry', 'Not found financial entry with provided ID'))
+    }
     res.status(200).json({
         status: 'success',
-        financialEntries
+        entry
+    })
+};
+const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntriesQuery>, res: Response, next: NextFunction) => {
+    const {
+        page = '1',
+        pageSize = '10',
+        sortOrder = '-1',
+        sortParameter
+    } = req.query;
+
+    const filters = getMatchFilters({
+        ...req.query
+    }, {
+        searchText: ['name', 'description'],
+        amountFrom: ['amount'],
+        amountTo: ['amount']
+    }) as any;
+
+    const facets = getFacets({
+        pageSize,
+        page,
+        sortOrder,
+        fields: {
+            name: 1,
+            description: 1,
+            date: 1,
+            amount: 1,
+            'categories.name': 1,
+            'categories._id': 1,
+            'categories.description': 1,
+            'categories.color': 1
+        },
+        sortParameter,
+    })
+
+
+    const matchFilters: any = {
+        $and: [
+            {userId: new mongoose.Types.ObjectId(req.user.id)}
+        ],
+        ...filters
+    }
+
+    const aggregationPipeline = [
+        {
+            $match: matchFilters
+        },
+        {
+            $lookup: {
+                from: 'categories',
+                localField: 'categoryId',
+                foreignField: '_id',
+                as: 'categories'
+            }
+        },
+        {
+            $unwind: {path: '$categories', preserveNullAndEmptyArrays: true}
+        },
+        {
+            $facet: facets
+        },
+    ]
+
+    const [result] = await FinancialEntry.aggregate(aggregationPipeline);
+    const {paginatedResults, totalCount} = result;
+
+    const total = totalCount.length > 0 ? totalCount[0].count : 0;
+    const totalPages = Math.ceil(total / parseInt(pageSize));
+
+    res.status(200).json({
+        status: 'success',
+        results: paginatedResults,
+        totalPages,
+        totalCount: total,
+        currentPage: Number(page)
     })
 };
 

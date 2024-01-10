@@ -18,6 +18,7 @@ const userSchema = new Schema<IUser>({
     refreshToken: {type: String, required: false, select: false},
     resetPasswordToken: {type: String, required: false, select: false},
     createdAt: {type: String},
+    balance: {type: Number, default: 0}
 })
 
 
