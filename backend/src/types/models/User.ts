@@ -7,6 +7,7 @@ interface IUser {
     refreshToken: string | null | undefined;
     resetPasswordToken: string | null | undefined;
     createdAt: string;
+    updatedAt: string;
     balance: number;
     _id: string;
 }

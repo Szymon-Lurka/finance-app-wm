@@ -21,8 +21,8 @@ import handlebars from "handlebars";
 import {getResetPasswordTemplate, nodemailerSetup} from "../utils/email/nodemailerSetup";
 import {HttpStatusCode} from "../types/enums/HttpStatusCode";
 import {UserBody} from "../types/models/User";
-import FinancialEntry from "../models/FinancialEntry";
-import * as mongoose from "mongoose";
+import dayjs from "dayjs";
+import {getNow} from "../utils/date/DateUtils";
 
 const forgotPassword = async (req: CustomRequest<{}, ForgotPasswordBody>, res: Response, next: NextFunction) => {
     const {email} = req.body;
@@ -84,8 +84,6 @@ const resetPassword = async (req: CustomRequest<{}, ResetPasswordBody>, res: Res
     }
 
     if (user.resetPasswordToken !== token) {
-        user.resetPasswordToken = null;
-        await user.save();
         return next(new ValidationError('Wrong token reset password', 'Token for password reset is incorrect.'))
     }
 
@@ -94,6 +92,7 @@ const resetPassword = async (req: CustomRequest<{}, ResetPasswordBody>, res: Res
     // Everything is ok, so we're saving new password and deleting resetPasswordToken
     user.password = await bcrypt.hash(newPassword, 10);
     user.resetPasswordToken = null;
+    user.updatedAt = getNow();
     await user.save();
 
     res.status(201).json({
@@ -121,7 +120,7 @@ const register = async (req: CustomRequest<{}, UserBody>, res: Response, next: N
         return next(new ValidationError('Wrong password', errors.auth.password))
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const createdAt = new Date().toISOString();
+    const createdAt = dayjs().toISOString();
 
     try {
         const user = new User({username, password: hashedPassword, email, firstName, lastName, createdAt});

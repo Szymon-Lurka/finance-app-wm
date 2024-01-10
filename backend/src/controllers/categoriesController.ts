@@ -8,6 +8,7 @@ import {ApiFeatures} from "../utils/api/apiFeatures";
 import {getFacets, getMatchFilters} from "../utils/api/aggregateFeatures";
 import mongoose from "mongoose";
 import {GetCategoriesQuery} from "../types/models/Category";
+import {getNow} from "../utils/date/DateUtils";
 
 const addCategory = async (req: CustomRequest<{}, AddCategoryBody>, res: Response, next: NextFunction) => {
     const {description, name, color} = req.body;
@@ -37,7 +38,7 @@ const updateCategory = async (req: CustomRequest<{
     const {description, name, color} = req.body;
     let category;
     try {
-        category = await Category.findOneAndUpdate({_id: categoryID}, {description, name, color});
+        category = await Category.findOneAndUpdate({_id: categoryID}, {description, name, color, updatedAt: getNow()});
     } catch (e) {
         return next(createMongoDBError(e));
     }
@@ -50,12 +51,6 @@ const updateCategory = async (req: CustomRequest<{
 const deleteCategory = async (req: Request, res: Response, next: NextFunction) => {
     const categoryID = req.params.id;
     const category = await Category.findOneAndDelete({_id: categoryID});
-    if (!category) {
-        return res.status(200).json({
-            status: 'success',
-            message: 'Category not exists.'
-        })
-    }
     res.status(410).json({
         status: 'success',
         message: 'Successfully deleted category',

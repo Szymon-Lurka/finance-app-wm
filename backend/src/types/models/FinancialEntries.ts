@@ -13,6 +13,8 @@ interface IFinancialEntries {
     _id: string;
     currency: string;
     type: FinancialEntryType;
+    createdAt: string;
+    updatedAt: string;
 }
 
 interface GetFinancialEntriesQuery extends SharedQuery {

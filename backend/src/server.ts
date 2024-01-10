@@ -7,6 +7,7 @@ import errorHandler from "./controllers/errorController";
 import initializeApp from "./initialize";
 import {BaseError} from "./utils/errors/AppError";
 import financialEntriesRouter from "./routes/financialEntries";
+import {getNow} from "./utils/date/DateUtils";
 
 const app = initializeApp();
 
@@ -27,7 +28,6 @@ app.use(async (err: BaseError, req: Request, res: Response, next: NextFunction) 
 const server = app.listen(PORT, () => {
     console.log(`Listening on PORT: ${PORT}`);
 })
-
 
 process.on('uncaughtException', (err: any) => {
     console.log('UNCAUGHT EXCEPTION! Shutting down...');

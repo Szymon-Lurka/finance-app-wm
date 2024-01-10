@@ -6,6 +6,8 @@ import {BodyFieldsValidationError, UnauthorizedError, ValidationError} from "../
 import {PASSWORD_VALIDATION_REGEX} from "../constants/regexes";
 import errors from "../constants/errors";
 import bcrypt from "bcryptjs";
+import dayjs from "dayjs";
+import {getNow} from "../utils/date/DateUtils";
 
 const updateUser = async (req: CustomRequest<{}, ManageUserBody>, res: Response, next: NextFunction) => {
     const {firstName, lastName, password, username, currentPassword} = req.body;
@@ -35,6 +37,7 @@ const updateUser = async (req: CustomRequest<{}, ManageUserBody>, res: Response,
     if (username) {
         user.username = username;
     }
+    user.updatedAt = getNow();
     await user.save();
     res.status(201).json({
         status: 'success',

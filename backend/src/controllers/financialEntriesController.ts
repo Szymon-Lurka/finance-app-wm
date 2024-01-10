@@ -11,6 +11,7 @@ import FinancialEntry from "../models/FinancialEntry";
 import Category from "../models/Category";
 import mongoose from "mongoose";
 import {getFacets, getMatchFilters} from "../utils/api/aggregateFeatures";
+import {getNow} from "../utils/date/DateUtils";
 
 const addFinancialEntry = async (req: CustomRequest<{}, AddFinancialEntryBody>, res: Response, next: NextFunction) => {
     const {description, name, amount, date, type, currency, categoryId} = req.body;
@@ -63,13 +64,13 @@ const updateFinancialEntry = async (req: CustomRequest<{
 
     let category;
     if (categoryId) {
-        category = Category.findOne({_id: categoryId, userId: req.user.id})
+        category = await Category.findOne({_id: new mongoose.Types.ObjectId(categoryId), userId: req.user.id})
     }
     if (categoryId && !category) {
         return next(new NotFoundError('Category does not exists - update financial entry', 'Category does not exists'))
     }
 
-    await FinancialEntry.findOneAndUpdate({_id: entryID}, req.body);
+    await FinancialEntry.findOneAndUpdate({_id: entryID}, {...req.body, updatedAt: getNow()});
     res.status(210).json({
         status: 'success',
         message: 'Successfully updated financial entry'

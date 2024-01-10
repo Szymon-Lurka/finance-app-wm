@@ -4,6 +4,7 @@ import User from "./User";
 import {BaseError, NotFoundError} from "../utils/errors/AppError";
 import {HttpStatusCode} from "../types/enums/HttpStatusCode";
 import {NextFunction} from "express";
+import {getNow} from "../utils/date/DateUtils";
 
 const financialEntrySchema = new Schema<IFinancialEntries>({
     description: {type: String},
@@ -13,7 +14,9 @@ const financialEntrySchema = new Schema<IFinancialEntries>({
     currency: {type: String, required: true},
     amount: {type: Number, required: true},
     date: {type: String},
-    type: {type: String, enum: ['expense', 'income'], default: 'expense'}
+    type: {type: String, enum: ['expense', 'income'], default: 'expense'},
+    createdAt: {type: String},
+    updatedAt: {type: String}
 })
 const updateUserBalance = async (userID: string, type: FinancialEntryType, amount: number, next: NextFunction) => {
     try {
@@ -35,6 +38,9 @@ const updateUserBalance = async (userID: string, type: FinancialEntryType, amoun
 
 // @ts-ignore
 financialEntrySchema.pre('save', async function (next: NextFunction) {
+    const now = getNow();
+    this.createdAt = now;
+    this.updatedAt = now;
     await updateUserBalance(this.userId as unknown as string, this.type, this.amount, next);
     next();
 })
@@ -43,7 +49,9 @@ financialEntrySchema.pre('save', async function (next: NextFunction) {
 // @ts-ignore
 financialEntrySchema.pre('findOneAndUpdate', async function (next: NextFunction) {
     const entry = this;
-    const update: Partial<{ amount?: number; type?: FinancialEntryType }> = entry.getUpdate() as Partial<{ amount?: number }>;
+    const update: Partial<{ amount?: number; type?: FinancialEntryType }> = entry.getUpdate() as Partial<{
+        amount?: number
+    }>;
     if (update.amount) {
         const id = entry.getQuery()._id;
         const financialEntry = await entry.model.findById(id);

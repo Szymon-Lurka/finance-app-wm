@@ -3,26 +3,30 @@ import {isEmpty} from "../tools/validatorTools";
 
 const financialEntriesValidator = (body: AddFinancialEntryBody) => {
     const invalidFields: string[] = [];
-    Object.keys(body).forEach((key) => {
-        // @ts-ignore
-        const val = body[key];
-        if (isEmpty(val)) {
-            invalidFields.push(key);
-        }
-    })
+    if (isEmpty(body.name)) {
+        invalidFields.push('name')
+    }
+    if ((body.type === 'income' && body.amount < 0) || (body.type === 'expense' && body.amount > 0)) {
+        invalidFields.push('type');
+        invalidFields.push('amount');
+    }
+    // @ts-ignore
+    if (body.type != 'income' && body.type != 'expense') {
+        invalidFields.push('type');
+    }
+    if (isEmpty(body.currency)) {
+        invalidFields.push('currency');
+    }
     return invalidFields;
 }
 
 const updateFinancialEntryValidator = (body: UpdateFinancialEntryBody) => {
     const invalidFields: string[] = [];
-    Object.keys(body).forEach((key) => {
-        // @ts-ignore
-        const val = body[key];
-        console.log(val);
-        if (isEmpty(val)) {
-            invalidFields.push(key);
-        }
-    })
+    //@ts-ignore
+    if (body.type && (body.type != 'income' && body.type != 'expense')) {
+        invalidFields.push('type');
+    }
+
     return invalidFields;
 }
 

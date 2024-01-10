@@ -8,6 +8,7 @@ interface ICategory {
     userId: Schema.Types.ObjectId;
     _id: string;
     createdAt: string;
+    updatedAt: string;
 }
 
 interface GetCategoriesQuery extends SharedQuery {

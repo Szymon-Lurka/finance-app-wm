@@ -3,13 +3,9 @@ import {isEmpty} from "../tools/validatorTools";
 
 const validateCategoryBody = (body: AddCategoryBody) => {
     const invalidFields: string[] = [];
-    Object.keys(body).forEach((key) => {
-        // @ts-ignore
-        const val = body[key];
-        if (isEmpty(val) || typeof val === 'number') {
-            invalidFields.push(key);
-        }
-    })
+    if (isEmpty(body.name)) {
+        invalidFields.push('name')
+    }
     return invalidFields;
 }
 
