@@ -16,9 +16,9 @@ const userSchema = new Schema<IUser>({
         validate: [validator.isEmail, 'Please provide valid email!']
     },
     refreshToken: {type: String, required: false, select: false},
-    resetPasswordToken: {type: String, required: false, select: false}
+    resetPasswordToken: {type: String, required: false, select: false},
+    createdAt: {type: String},
 })
-
 
 
 const User = model<IUser>('User', userSchema);

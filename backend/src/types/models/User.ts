@@ -6,6 +6,7 @@ interface IUser {
     email: string;
     refreshToken: string | null | undefined;
     resetPasswordToken: string | null | undefined;
+    createdAt: string;
     _id: string;
 }
 
