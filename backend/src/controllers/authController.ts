@@ -21,6 +21,8 @@ import handlebars from "handlebars";
 import {getResetPasswordTemplate, nodemailerSetup} from "../utils/email/nodemailerSetup";
 import {HttpStatusCode} from "../types/enums/HttpStatusCode";
 import {UserBody} from "../types/models/User";
+import FinancialEntry from "../models/FinancialEntry";
+import * as mongoose from "mongoose";
 
 const forgotPassword = async (req: CustomRequest<ForgotPasswordBody>, res: Response, next: NextFunction) => {
     const {email} = req.body;
@@ -171,10 +173,19 @@ const refreshToken = async (req: CustomRequest<RefreshTokenBody>, res: Response,
     }
 };
 
+const getMe = async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const user = await User.findById(req.user.id);
+    res.status(200).json({
+        status: 'success',
+        data: user
+    })
+}
+
 export {
     register,
     refreshToken,
     login,
     forgotPassword,
     resetPassword,
+    getMe,
 }

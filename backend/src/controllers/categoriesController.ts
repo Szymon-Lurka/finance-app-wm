@@ -8,11 +8,7 @@ import {ApiFeatures} from "../utils/api/apiFeatures";
 
 const addCategory = async (req: CustomRequest<AddCategoryBody>, res: Response, next: NextFunction) => {
     const {description, name, color} = req.body;
-    const invalidFields = validateCategoryBody({
-        description,
-        name,
-        color
-    });
+    const invalidFields = validateCategoryBody(req.body);
     if (invalidFields.length > 0) {
         return next(new BodyFieldsValidationError('Add category wrong data', invalidFields))
     }
@@ -21,7 +17,7 @@ const addCategory = async (req: CustomRequest<AddCategoryBody>, res: Response, n
         category = new Category({description, name, color, userId: req.user.id});
         await category.save();
     } catch (e) {
-        next(createMongoDBError(e));
+        return next(createMongoDBError(e));
     }
     res.status(201).json({
         status: 'created',

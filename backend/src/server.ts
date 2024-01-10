@@ -6,6 +6,7 @@ import categoriesRouter from './routes/categories';
 import errorHandler from "./controllers/errorController";
 import initializeApp from "./initialize";
 import {BaseError} from "./utils/errors/AppError";
+import financialEntriesRouter from "./routes/financialEntries";
 
 const app = initializeApp();
 
@@ -14,6 +15,7 @@ const PORT = process.env.PORT;
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/categories', categoriesRouter);
+app.use('/api/v1/financial-entries', financialEntriesRouter)
 
 // Must be the last one to handle ALL errors!
 // It MUST have 4 parameters: err,req,res,next - otherwise this handler won't fire

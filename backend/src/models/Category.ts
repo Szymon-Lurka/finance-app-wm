@@ -5,7 +5,7 @@ const categorySchema = new Schema<ICategory>({
     description: {type: String, required: true},
     name: {type: String, unique: true},
     color: {type: String},
-    userId: {type: Schema.Types.ObjectId, ref: 'User'},
+    userId: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     createdAt: {type: String},
 })
 

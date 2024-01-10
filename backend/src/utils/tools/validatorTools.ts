@@ -1,4 +1,4 @@
-const isEmpty = (val: unknown) => val === '' || val === null || val === undefined || typeof val === 'number';
+const isEmpty = (val: unknown) => val === '' || val === null || val === undefined;
 
 export {
     isEmpty
