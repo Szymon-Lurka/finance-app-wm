@@ -1,4 +1,5 @@
 import {Schema} from "mongoose";
+import {SharedQuery} from "./Shared";
 
 interface ICategory {
     color: string;
@@ -7,6 +8,11 @@ interface ICategory {
     userId: Schema.Types.ObjectId;
     _id: string;
     createdAt: string;
+    updatedAt: string;
+}
+
+interface GetCategoriesQuery extends SharedQuery {
+    searchText?: string;
 }
 
 interface UpdateCategoryBody {
@@ -24,5 +30,6 @@ interface AddCategoryBody {
 export {
     ICategory,
     AddCategoryBody,
-    UpdateCategoryBody
+    UpdateCategoryBody,
+    GetCategoriesQuery
 }
