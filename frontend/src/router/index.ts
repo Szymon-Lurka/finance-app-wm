@@ -1,11 +1,12 @@
 import {createRouter, createWebHashHistory} from "vue-router";
 import routes from "./routes";
+import {authGuard} from "@/router/guards";
 
 const router = createRouter({
     history: createWebHashHistory(),
     routes
 })
 
-// TODO: Add guards (auth)
+router.beforeEach(authGuard);
 
 export default router;

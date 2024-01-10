@@ -81,6 +81,7 @@ const getCategories = async (req: CustomRequest<{}, {}, GetCategoriesQuery>, res
     const filters = getMatchFilters({searchText}, {
         searchText: ['name', 'description']
     })
+
     const facets = getFacets({
         pageSize,
         page,

@@ -14,7 +14,7 @@ import {getFacets, getMatchFilters} from "../utils/api/aggregateFeatures";
 import {getNow} from "../utils/date/DateUtils";
 
 const addFinancialEntry = async (req: CustomRequest<{}, AddFinancialEntryBody>, res: Response, next: NextFunction) => {
-    const {description, name, amount, date, type, currency, categoryId} = req.body;
+    const {description, name, amount, date, type, categoryId} = req.body;
     const invalidFields = financialEntriesValidator(req.body);
     if (invalidFields.length > 0) {
         return next(new BodyFieldsValidationError('Add financial entry wrong data', invalidFields));
@@ -35,7 +35,6 @@ const addFinancialEntry = async (req: CustomRequest<{}, AddFinancialEntryBody>, 
             userId: req.user.id,
             date,
             type,
-            currency,
             categoryId
         })
         await financialEntry.save();
@@ -122,7 +121,9 @@ const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntrie
     }, {
         searchText: ['name', 'description'],
         amountFrom: ['amount'],
-        amountTo: ['amount']
+        amountTo: ['amount'],
+        type: ['type'],
+        categoryId: 'categoryId'
     }) as any;
 
     const facets = getFacets({
@@ -134,10 +135,11 @@ const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntrie
             description: 1,
             date: 1,
             amount: 1,
+            type: 1,
             'categories.name': 1,
             'categories._id': 1,
             'categories.description': 1,
-            'categories.color': 1
+            'categories.color': 1,
         },
         sortParameter,
     })
@@ -166,13 +168,24 @@ const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntrie
             $unwind: {path: '$categories', preserveNullAndEmptyArrays: true}
         },
         {
-            $facet: facets
+            $facet: {
+                ...facets,
+                sumAmount: [
+                    {
+                        $group: {
+                            _id: null,
+                            totalAmount: {$sum: '$amount'}
+                        }
+                    }
+                ]
+            }
         },
     ]
 
     const [result] = await FinancialEntry.aggregate(aggregationPipeline);
-    const {paginatedResults, totalCount} = result;
+    const {paginatedResults, totalCount, sumAmount} = result;
 
+    const totalAmount = sumAmount.length > 0 ? sumAmount[0].totalAmount : 0;
     const total = totalCount.length > 0 ? totalCount[0].count : 0;
     const totalPages = Math.ceil(total / parseInt(pageSize));
 
@@ -181,7 +194,8 @@ const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntrie
         results: paginatedResults,
         totalPages,
         totalCount: total,
-        currentPage: Number(page)
+        currentPage: Number(page),
+        totalAmount
     })
 };
 

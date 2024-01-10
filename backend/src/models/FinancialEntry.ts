@@ -5,16 +5,16 @@ import {BaseError, NotFoundError} from "../utils/errors/AppError";
 import {HttpStatusCode} from "../types/enums/HttpStatusCode";
 import {NextFunction} from "express";
 import {getNow} from "../utils/date/DateUtils";
+import {EXPENSE, INCOME} from "../constants/financial";
 
 const financialEntrySchema = new Schema<IFinancialEntries>({
     description: {type: String},
     name: {type: String, required: true},
     userId: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     categoryId: {type: Schema.Types.ObjectId, ref: 'Category'},
-    currency: {type: String, required: true},
     amount: {type: Number, required: true},
     date: {type: String},
-    type: {type: String, enum: ['expense', 'income'], default: 'expense'},
+    type: {type: String, enum: [EXPENSE, INCOME], required: true},
     createdAt: {type: String},
     updatedAt: {type: String}
 })
@@ -24,9 +24,9 @@ const updateUserBalance = async (userID: string, type: FinancialEntryType, amoun
         if (!user) {
             return next(new NotFoundError('Change balance user', 'User not found'))
         }
-        if (type === 'income') {
+        if (type === INCOME) {
             user.balance += Math.abs(amount);
-        } else if (type === 'expense') {
+        } else if (type === EXPENSE) {
             user.balance -= Math.abs(amount);
         }
         user.balance = Number(user.balance.toFixed(2));
@@ -48,13 +48,12 @@ financialEntrySchema.pre('save', async function (next: NextFunction) {
 
 // @ts-ignore
 financialEntrySchema.pre('findOneAndUpdate', async function (next: NextFunction) {
-    const entry = this;
-    const update: Partial<{ amount?: number; type?: FinancialEntryType }> = entry.getUpdate() as Partial<{
+    const update: Partial<{ amount?: number; type?: FinancialEntryType }> = this.getUpdate() as Partial<{
         amount?: number
     }>;
     if (update.amount) {
-        const id = entry.getQuery()._id;
-        const financialEntry = await entry.model.findById(id);
+        const id = this.getQuery()._id;
+        const financialEntry = await this.model.findById(id);
         if (financialEntry) {
             const type = update.type ? update.type : financialEntry.type;
             await updateUserBalance(financialEntry.userId, type, update.amount, next)
