@@ -3,6 +3,7 @@ import {computed, defineComponent, onBeforeUnmount, onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import {useUiStore} from "@/stores/uiStore";
 import {useAuthStore} from "@/stores/authStore";
+import {useUserStore} from "@/stores/userStore";
 
 export default defineComponent({
   setup() {
@@ -10,10 +11,16 @@ export default defineComponent({
     const uiStore = useUiStore();
     const topbarMenuActive = ref(false);
     const outsideClickListener = ref(null);
+    const userStore = useUserStore();
+    const balance = computed(() => userStore.getBalance);
     const authStore = useAuthStore();
 
     const onLogout = () => {
       authStore.signOut();
+    }
+
+    const onUserClick = () => {
+      router.push('/dashboard/user');
     }
 
     onMounted(() => {
@@ -64,7 +71,9 @@ export default defineComponent({
       onMenuToggle,
       onTopBarMenuButton,
       topbarMenuClasses,
-      onLogout
+      onLogout,
+      balance,
+      onUserClick
     }
   }
 })
@@ -85,13 +94,15 @@ export default defineComponent({
     </button>
 
     <div class="layout-topbar-menu" :class="topbarMenuClasses">
-      <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
+      <badge v-if="balance" size="large" :severity="balance > 0 ? 'success' : 'danger'">
+        {{ balance }} zł
+      </badge>
+      <badge v-else>
+        0 zł
+      </badge>
+      <button @click="onUserClick()" class="p-link layout-topbar-button">
         <i class="pi pi-user"></i>
         <span>Profile</span>
-      </button>
-      <button class="p-link layout-topbar-button">
-        <i class="pi pi-cog"></i>
-        <span>Settings</span>
       </button>
       <button class="p-link layout-topbar-button" @click="onLogout">
         <i class="pi pi-power-off"></i>
@@ -100,4 +111,3 @@ export default defineComponent({
     </div>
   </div>
 </template>
-

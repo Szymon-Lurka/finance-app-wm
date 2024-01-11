@@ -21,9 +21,10 @@ interface UserBody {
 }
 
 interface ManageUserBody {
-    currentPassword: string;
+    currentPassword?: string;
     username?: string;
-    password?: string;
+    repeatPassword?: string;
+    newPassword?: string;
     lastName?: string;
     firstName?: string;
 }

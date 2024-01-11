@@ -1,4 +1,4 @@
-import {NextFunction, Request, Response} from 'express';
+ import {NextFunction, Request, Response} from 'express';
 
 import authRouter from "./routes/auth";
 import userRouter from './routes/user';

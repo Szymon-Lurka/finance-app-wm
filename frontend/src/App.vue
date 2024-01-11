@@ -14,6 +14,7 @@ export default defineComponent({
 
 <template>
   <div class="app">
+    <Toast />
     <router-view v-slot="{Component}">
       <component :is="Component"/>
     </router-view>

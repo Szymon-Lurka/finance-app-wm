@@ -180,6 +180,19 @@ const getMe = async (req: CustomRequest, res: Response, next: NextFunction) => {
     })
 }
 
+const getBalance = async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+        return next(new NotFoundError('Balance user', 'User not found'))
+    }
+    res.status(200).json({
+        status: 'success',
+        data: {
+            balance: user.balance
+        }
+    })
+}
+
 export {
     register,
     refreshToken,
@@ -187,4 +200,5 @@ export {
     forgotPassword,
     resetPassword,
     getMe,
+    getBalance,
 }

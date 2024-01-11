@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use((config) => {
     const authStore = useAuthStore();
     const token = JSON.parse(authStore.token);
-    config.headers['Authorization'] = authStore.isAuthenticated ? `Bearer ${token}` : '';
+    config.headers['Authorization'] = token ? `Bearer ${token}` : '';
     return config;
 })
 
