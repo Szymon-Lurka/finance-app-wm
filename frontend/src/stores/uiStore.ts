@@ -6,6 +6,7 @@ const useUiStore = defineStore('ui', {
         layoutConfig: {
             menuMode: 'static',
             inputStyle: 'outlined',
+            darkTheme: 'light'
         },
         layoutState: {
             staticMenuDesktopInactive: false,

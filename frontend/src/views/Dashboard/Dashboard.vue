@@ -51,6 +51,8 @@ export default defineComponent({
         'p-input-filled': layoutConfig.inputStyle === 'filled',
         'layout-static-inactive': layoutState.staticMenuDesktopInactive && layoutConfig.menuMode === 'static',
         'layout-mobile-active': layoutState.staticMenuMobileActive,
+        'layout-theme-light': layoutConfig.darkTheme === 'light',
+        'layout-theme-dark': layoutConfig.darkTheme === 'dark',
       };
     });
     return {
