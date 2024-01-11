@@ -1,25 +1,48 @@
 <script lang="ts">
-import {defineComponent} from "vue";
+import {computed, defineComponent, ref} from "vue";
+import {useUiStore} from "@/stores/uiStore";
+import {useAuthStore} from "@/stores/authStore";
 
-export default defineComponent({})
+export default defineComponent({
+  setup() {
+    const uiStore = useUiStore();
+    const authStore = useAuthStore();
+    const itemClick = () => {
+      const {overlayMenuActive, staticMenuMobileActive} = uiStore.layoutState;
+      if (overlayMenuActive || staticMenuMobileActive) {
+        uiStore.onMenuToggle();
+      }
+    }
+    const items = ref([
+      {
+        label: 'Home',
+        icon: 'pi pi-home'
+      },
+      {
+        label: 'Categories',
+        icon: 'pi pi-star'
+      },
+    ])
+
+
+    const logout = () => {
+      authStore.signOut();
+    }
+    return {
+      logout,
+      itemClick,
+      isUserLoaded: true,
+      items,
+    }
+
+  }
+})
 </script>
 
 <template>
-  <nav class="app-navigation">
-    <router-link to="/dashboard/home" title="home" aria-label="home">
-      home
-    </router-link>
-    <router-link to="/dashboard/categories" title="categories" aria-label="categories">
-      categories
-    </router-link>
-  </nav>
+  <ul class="layout-menu">
+    <li @click="itemClick">
+      <router-link to="/dashboard/categories">Categories</router-link>
+    </li>
+  </ul>
 </template>
-
-<style scoped lang="scss">
-.app-navigation {
-  position: fixed;
-  width: 280px;
-  height:100vh;
-  background-color: #c0c0c0;
-}
-</style>

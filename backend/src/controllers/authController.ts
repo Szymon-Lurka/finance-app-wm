@@ -1,6 +1,6 @@
 import {NextFunction, Response} from "express";
 import {CustomRequest} from "../types/models/Request";
-import {ForgotPasswordBody, LoginUserBody, RefreshTokenBody, ResetPasswordBody, UserBody} from "../types/models/Auth";
+import {ForgotPasswordBody, LoginUserBody, RefreshTokenBody, ResetPasswordBody} from "../types/models/Auth";
 import {
     BaseError,
     BodyFieldsValidationError,
@@ -20,8 +20,11 @@ import {messages} from "../constants/messages";
 import handlebars from "handlebars";
 import {getResetPasswordTemplate, nodemailerSetup} from "../utils/email/nodemailerSetup";
 import {HttpStatusCode} from "../types/enums/HttpStatusCode";
+import {UserBody} from "../types/models/User";
+import dayjs from "dayjs";
+import {getNow} from "../utils/date/DateUtils";
 
-const forgotPassword = async (req: CustomRequest<ForgotPasswordBody>, res: Response, next: NextFunction) => {
+const forgotPassword = async (req: CustomRequest<{}, ForgotPasswordBody>, res: Response, next: NextFunction) => {
     const {email} = req.body;
 
     if (!email) {
@@ -60,7 +63,7 @@ const forgotPassword = async (req: CustomRequest<ForgotPasswordBody>, res: Respo
     })
 };
 
-const resetPassword = async (req: CustomRequest<ResetPasswordBody>, res: Response, next: NextFunction) => {
+const resetPassword = async (req: CustomRequest<{}, ResetPasswordBody>, res: Response, next: NextFunction) => {
     const {token, newPassword} = req.body;
 
     if (!token) {
@@ -81,8 +84,6 @@ const resetPassword = async (req: CustomRequest<ResetPasswordBody>, res: Respons
     }
 
     if (user.resetPasswordToken !== token) {
-        user.resetPasswordToken = null;
-        await user.save();
         return next(new ValidationError('Wrong token reset password', 'Token for password reset is incorrect.'))
     }
 
@@ -91,6 +92,7 @@ const resetPassword = async (req: CustomRequest<ResetPasswordBody>, res: Respons
     // Everything is ok, so we're saving new password and deleting resetPasswordToken
     user.password = await bcrypt.hash(newPassword, 10);
     user.resetPasswordToken = null;
+    user.updatedAt = getNow();
     await user.save();
 
     res.status(201).json({
@@ -99,7 +101,7 @@ const resetPassword = async (req: CustomRequest<ResetPasswordBody>, res: Respons
     })
 }
 
-const register = async (req: CustomRequest<UserBody>, res: Response, next: NextFunction) => {
+const register = async (req: CustomRequest<{}, UserBody>, res: Response, next: NextFunction) => {
     const {username, password, email, lastName, firstName} = req.body;
     const invalidFields = validateRegisterBody({
         username,
@@ -118,9 +120,10 @@ const register = async (req: CustomRequest<UserBody>, res: Response, next: NextF
         return next(new ValidationError('Wrong password', errors.auth.password))
     }
     const hashedPassword = await bcrypt.hash(password, 10);
+    const createdAt = dayjs().toISOString();
 
     try {
-        const user = new User({username, password: hashedPassword, email, firstName, lastName});
+        const user = new User({username, password: hashedPassword, email, firstName, lastName, createdAt});
         await user.save();
     } catch (e) {
         next(createMongoDBError(e));
@@ -132,7 +135,7 @@ const register = async (req: CustomRequest<UserBody>, res: Response, next: NextF
     })
 }
 
-const login = async (req: CustomRequest<LoginUserBody>, res: Response, next: NextFunction) => {
+const login = async (req: CustomRequest<{}, LoginUserBody>, res: Response, next: NextFunction) => {
     const {username, email, password} = req.body;
     const user = await User.findOne(username ? {username} : {email}).select('+password');
     if (!user) {
@@ -145,7 +148,7 @@ const login = async (req: CustomRequest<LoginUserBody>, res: Response, next: Nex
     await createJWT(user, 200, res);
 };
 
-const refreshToken = async (req: CustomRequest<RefreshTokenBody>, res: Response, next: NextFunction) => {
+const refreshToken = async (req: CustomRequest<{}, RefreshTokenBody>, res: Response, next: NextFunction) => {
     const {refreshToken} = req.body;
     if (!refreshToken) {
         return next(new UnauthorizedError('RefreshToken', errors.auth.refreshToken))
@@ -169,10 +172,19 @@ const refreshToken = async (req: CustomRequest<RefreshTokenBody>, res: Response,
     }
 };
 
+const getMe = async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const user = await User.findById(req.user.id);
+    res.status(200).json({
+        status: 'success',
+        data: user
+    })
+}
+
 export {
     register,
     refreshToken,
     login,
     forgotPassword,
     resetPassword,
+    getMe,
 }

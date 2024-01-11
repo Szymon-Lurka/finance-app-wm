@@ -6,6 +6,7 @@ export default defineComponent({})
 
 <template>
   Homepage
+  <button class="p-link">XD</button>
 </template>
 
 <style scoped lang="scss">

@@ -1,7 +1,6 @@
-// Reset
-@import './components/reset.scss';
+$gutter: 1rem; //for primeflex grid system
 
-//Core
-@import './components/variables.scss';
-@import './components/typography.scss';
-@import './components/animations.scss';
+
+@import './layout/layout.scss';
+@import 'primeflex/primeflex.scss';
+@import 'primeicons/primeicons.css';
