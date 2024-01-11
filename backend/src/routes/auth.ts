@@ -1,6 +1,14 @@
 import express from 'express';
 import catchAsync from "../utils/errors/catchAsync";
-import {forgotPassword, getMe, login, refreshToken, register, resetPassword} from "../controllers/authController";
+import {
+    forgotPassword,
+    getBalance,
+    getMe,
+    login,
+    refreshToken,
+    register,
+    resetPassword
+} from "../controllers/authController";
 import verifyToken from "../middleware/authMiddleware";
 
 const router = express.Router();
@@ -16,5 +24,7 @@ router.post('/forgot-password', catchAsync(forgotPassword))
 router.patch('/reset-password', catchAsync(resetPassword))
 
 router.get('/me', verifyToken, catchAsync(getMe));
+
+router.get('/balance', verifyToken, catchAsync(getBalance))
 
 export default router;

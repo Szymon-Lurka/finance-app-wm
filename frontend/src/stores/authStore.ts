@@ -6,7 +6,7 @@ import router from "@/router";
 
 const useAuthStore = defineStore('auth', {
     state: () => ({
-        token: getInitialAccessToken()
+        token: getInitialAccessToken(),
     }),
     actions: {
         async signIn({email, password}) {
@@ -32,10 +32,24 @@ const useAuthStore = defineStore('auth', {
             this.token = null;
             tokenService.clearTokens();
             router.push({name: 'Auth'});
+        },
+        async register({email, password, firstName, lastName, username}) {
+            try {
+                await authService.register({
+                    email,
+                    password,
+                    firstName,
+                    lastName,
+                    username
+                })
+            } catch (e) {
+                console.log(e);
+                throw (e);
+            }
         }
     },
     getters: {
-        isAuthenticated: (state) => !!state.token
+        isAuthenticated: (state) => !!state.token,
     }
 })
 

@@ -11,6 +11,9 @@ import Ripple from "primevue/ripple";
 import Badge from "primevue/badge";
 import Menubar from "primevue/menubar";
 import StyleClass from 'primevue/styleclass';
+import Card from "primevue/card";
+import Toast from "primevue/toast";
+import ToastService from 'primevue/toastservice';
 
 const app = createApp(App);
 
@@ -18,6 +21,8 @@ app.component('Button', Button);
 app.component('InputText', InputText);
 app.component('Badge', Badge);
 app.component('Menubar', Menubar);
+app.component('Card', Card);
+app.component('Toast', Toast);
 
 app.directive('ripple', Ripple)
 app.directive('styleclass', StyleClass);
@@ -25,5 +30,6 @@ app.directive('styleclass', StyleClass);
 app.use(createPinia());
 app.use(PrimeVue, {ripple: true, inputStyle: 'filled'});
 app.use(router);
+app.use(ToastService);
 
 app.mount('#app');

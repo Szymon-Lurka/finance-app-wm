@@ -9,6 +9,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/auth',
         name: 'Auth',
+        component: () => import(/* webpackChunkName: 'auth-page' */ '@/views/Auth/Auth.vue'),
         redirect: '/auth/login',
         children: [
             {
@@ -49,6 +50,11 @@ const routes: RouteRecordRaw[] = [
                 name: 'Categories',
                 component: () => import(/* webpackChunkName: "categories-page" */ '@/views/Categories/Categories.vue'),
             },
+            {
+                path: '/dashboard/user',
+                name: 'User',
+                component: () => import(/*  webpackChunkName: 'user-page' */  '@/views/User/User.vue')
+            }
         ]
     }
 ];

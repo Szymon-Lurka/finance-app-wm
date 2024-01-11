@@ -13,6 +13,12 @@ const authService = {
         return axiosInstance.post('/api/v1/auth/refresh-token', {
             refreshToken: tokenService.getToken(Tokens.refresh)
         })
+    },
+    getMe() {
+        return axiosInstance.get('/api/v1/auth/me');
+    },
+    register: (payload: any) => {
+        return axiosInstance.post('/api/v1/auth/register', payload)
     }
 }
 export {authService}
