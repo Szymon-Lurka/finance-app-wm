@@ -1,6 +1,12 @@
 <script lang="ts">
-import router from '@/router';
-import { defineComponent, ref, computed, pushScopeId } from 'vue';
+import {defineComponent, ref, computed, pushScopeId} from 'vue';
+import {useField, useForm} from "vee-validate";
+import {object, string} from "yup";
+import {useIsFormDirty} from "@/composables/isFormDirty";
+import {useAuthStore} from "@/stores/authStore";
+import {useToast} from "primevue/usetoast";
+import {useRouter} from "vue-router";
+import {PASSWORD_VALIDATION_REGEX} from "@/constants/regexes";
 
 interface Form {
   username: string;
@@ -12,122 +18,110 @@ interface Form {
 
 export default defineComponent({
   setup() {
-    const form = ref<Form>({
-      username: '',
-      password: '',
-      email: '',
-      firstName: '',
-      lastName: '',
+    const router = useRouter();
+    const authStore = useAuthStore();
+    const toast = useToast();
+    const canShowErrors = ref(false);
+    const {
+      values,
+      handleSubmit,
+      errors
+    } = useForm({
+      validationSchema: object({
+        password: string().required('').matches(PASSWORD_VALIDATION_REGEX, 'Hasło musi mieć przynajmniej 8 znaków i zawierać przynajmniej 1 wielką literę, 1 symbol i 1 cyfrę.'),
+        email: string().required('Email jest wymagany').email('Email musi być poprawnym adresem e-mail'),
+        firstName: string().required('Imię jest wymagane').min(3, 'Imię musi mieć przynajmniej 3 znaki'),
+        lastName: string().required('Nazwisko jest wymagane').min(3, 'Imię musi mieć przynajmniej 3 znaki'),
+        username: string().required('Nazwa użytkownika jest wymagana').min(3, 'Nazwa użytkownika musi mieć przynajmniej 3 znaki')
+      }),
+      initialValues: {
+        password: null,
+        email: null,
+        firstName: null,
+        lastName: null,
+        username: null
+      }
     });
-    const triedToSubmit = ref('');
-    const PASSWORD_VALIDATION_REGEX =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    let isPasswordValid = undefined;
-    const submitForm = async () => {
-      let isPasswordValid = computed(() => PASSWORD_VALIDATION_REGEX.test(form.value.password));
 
-      if (!isPasswordValid.value) {
-        triedToSubmit.value =
-          'Password need to be minimum eight characters, at least one letter, one number and one special character';
-        throw new Error(
-          'Password need to be minimum eight characters, at least one letter, one number and one special character'
-        );
-      }
+    const password = useField('password');
+    const email = useField('email');
+    const firstName = useField('firstName');
+    const lastName = useField('lastName');
+    const username = useField('username');
 
-      try {
-        const response = await fetch('http://localhost:3001/api/v1/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(form.value),
-        });
+    const isFormDirty = useIsFormDirty([password, email, firstName, lastName, username]);
 
-        const result = await response.json();
-        if (result.status === 'error') {
-          triedToSubmit.value = result.message;
-          throw new Error(result.message);
+    const onSubmit = () => {
+      canShowErrors.value = true;
+      handleSubmit(async ({password, email, firstName, lastName, username}) => {
+        try {
+          await authStore.register({email, password, firstName, lastName, username});
+          toast.add({detail: 'Pomyślnie utworzono konto', severity: 'success', life: 3000, summary: 'Tworzenie konta'})
+          canShowErrors.value = false;
+          goToLogin();
+        } catch (e) {
+          console.log(e);
+          toast.add({detail: 'Nie udało się stworzyć konta', severity: 'error', life: 3000, summary: 'Tworzenie konta'})
         }
+      })();
+    }
 
-        await router.push('/auth/login');
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    };
-
-    return { form, submitForm, isPasswordValid, triedToSubmit };
+    const goToLogin = () => {
+      router.push('/auth/login')
+    }
+    return {
+      values,
+      errors,
+      onSubmit,
+      isFormDirty,
+      goToLogin,
+      canShowErrors,
+    }
   },
 });
 </script>
 
 <template>
-  <section class="registration-form">
-    <form @submit.prevent="submitForm" class="registration-form__form">
-      <fieldset class="registration-form__fieldset">
-        <legend>Register</legend>
-
-        <div class="registration-form__field">
-          <label for="username" class="registration-form__label">Username:</label>
-          <input
-            type="text"
-            id="username"
-            v-model="form.username"
-            required
-            class="registration-form__input"
-            minlength="3"
-          />
+  <Card class="card card-high" :class="{'card-high-errors': canShowErrors}">
+    <template #header>
+      <h2>
+        Zarejestruj się
+      </h2>
+    </template>
+    <template #content>
+      <form @submit.prevent="onSubmit" class="form">
+        <div class="form-group">
+          <div class="form-field">
+            <label for="email">Email</label>
+            <InputText type="text" v-model="values.email" name="email" id="email"/>
+            <p class="u-error-msg" v-if="canShowErrors && errors.email">{{ errors.email }}</p>
+          </div>
+          <div class="form-field">
+            <label for="password">Hasło</label>
+            <InputText type="password" v-model="values.password" name="password" id="password"/>
+            <p class="u-error-msg" v-if="canShowErrors && errors.password">{{ errors.password }}</p>
+          </div>
+          <div class="form-field">
+            <label for="username">Nazwa użytkownika</label>
+            <InputText type="text" v-model="values.username" name="username" id="username"/>
+            <p class="u-error-msg" v-if="canShowErrors && errors.username">{{ errors.username }}</p>
+          </div>
+          <div class="form-field">
+            <label for="firstName">Imię</label>
+            <InputText type="text" v-model="values.firstName" name="firstName" id="firstName"/>
+            <p class="u-error-msg" v-if="canShowErrors && errors.firstName">{{ errors.firstName }}</p>
+          </div>
+          <div class="form-field">
+            <label for="lastName">Nazwisko</label>
+            <InputText type="text" v-model="values.lastName" name="lastName" id="lastName"/>
+            <p class="u-error-msg" v-if="canShowErrors && errors.lastName">{{ errors.lastName }}</p>
+          </div>
+          <Button type="submit">Zarejestruj się</Button>
+          <Button severity="info" @click="goToLogin">Przejdź do logowania</Button>
         </div>
-
-        <div class="registration-form__field">
-          <label for="password" class="registration-form__label">Password:</label>
-          <input
-            type="password"
-            id="password"
-            v-model="form.password"
-            required
-            class="registration-form__input"
-          />
-        </div>
-
-        <div class="registration-form__field">
-          <label for="email" class="registration-form__label">Email:</label>
-          <input
-            type="email"
-            id="email"
-            v-model="form.email"
-            required
-            class="registration-form__input"
-          />
-        </div>
-
-        <div class="registration-form__field">
-          <label for="firstName" class="registration-form__label">First Name:</label>
-          <input
-            type="text"
-            id="firstName"
-            v-model="form.firstName"
-            required
-            class="registration-form__input"
-            minlength="3"
-          />
-        </div>
-
-        <div class="registration-form__field">
-          <label for="lastName" class="registration-form__label">Last Name:</label>
-          <input
-            type="text"
-            id="lastName"
-            v-model="form.lastName"
-            required
-            class="registration-form__input"
-            minlength="3"
-          />
-        </div>
-        <div class="password-invalid">
-          {{ triedToSubmit }}
-        </div>
-        <button type="submit" class="registration-form__submit">Register</button>
-      </fieldset>
-    </form>
-  </section>
+      </form>
+    </template>
+  </Card>
 </template>
 <style scoped lang="scss">
 .registration-form {
@@ -166,6 +160,7 @@ export default defineComponent({
     border-radius: 4px;
     box-sizing: border-box;
   }
+
   .password-invalid {
     color: red;
     margin-top: 5px;

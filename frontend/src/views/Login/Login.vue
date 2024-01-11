@@ -41,39 +41,40 @@ export default defineComponent({
     const goToRegister = () => {
       router.push('/auth/register')
     }
+
     return {
       errors,
       onSubmit,
       login,
-      goToRegister
+      goToRegister,
     }
   }
 })
 </script>
 
 <template>
-    <Card class="card">
-      <template #header>
-        <h2>Zaloguj się</h2>
-      </template>
-      <template #content>
-        <form @submit.prevent="onSubmit()" class="form">
-          <div class="form-group">
-            <div class="form-field">
-              <label for="email">Email</label>
-              <InputText v-model="login.email" type="text" name="email" id="email"/>
-              <p></p>
-            </div>
-            <div class="form-field">
-              <label for="password">Hasło</label>
-              <InputText v-model="login.password" type="password" name="password" id="password"/>
-            </div>
-            <Button type="submit">Login</Button>
-            <Button severity="info" @click="goToRegister">
-              Zarejestruj się
-            </Button>
+  <Card class="card">
+    <template #header>
+      <h2>Zaloguj się</h2>
+    </template>
+    <template #content>
+      <form @submit.prevent="onSubmit()" class="form">
+        <div class="form-group">
+          <div class="form-field">
+            <label for="email">Email</label>
+            <InputText v-model="login.email" type="text" name="email" id="email"/>
+            <p></p>
           </div>
-        </form>
-      </template>
-    </Card>
+          <div class="form-field">
+            <label for="password">Hasło</label>
+            <InputText v-model="login.password" type="password" name="password" id="password"/>
+          </div>
+          <Button type="submit">Zaloguj się</Button>
+          <Button severity="info" @click="goToRegister">
+            Zarejestruj się
+          </Button>
+        </div>
+      </form>
+    </template>
+  </Card>
 </template>

@@ -21,7 +21,6 @@ export default defineComponent({
         currentPassword: string().required('Aktualne hasło jest wymagane'),
         newPassword: string().required('').matches(PASSWORD_VALIDATION_REGEX, 'Hasło musi mieć przynajmniej 8 znaków i zawierać przynajmniej 1 wielką literę, 1 symbol i 1 cyfrę.'),
         repeatPassword: string()
-            .min(8)
             .oneOf([yupRef('newPassword'), null], 'Hasła muszą być takie same').required('Hasła muszą być takie same')
       }),
       initialValues: {
@@ -80,18 +79,24 @@ export default defineComponent({
           <div class="form-field">
             <label for="currentPassword">Aktualne hasło</label>
             <InputText type="password" id="currentPassword" placeholder="Hasło" v-model="passwordData.currentPassword"/>
-            <p v-if="showErrors && passwordErrors.currentPassword">{{ passwordErrors.currentPassword }}</p>
+            <p class="u-error-msg" v-if="showErrors && passwordErrors.currentPassword">{{
+                passwordErrors.currentPassword
+              }}</p>
           </div>
           <div class="form-field">
             <label for="password">Hasło</label>
             <InputText type="password" id="password" placeholder="Hasło" v-model="passwordData.newPassword"/>
-            <p v-if="showErrors && passwordErrors.currentPassword">{{ passwordErrors.newPassword }}</p>
+            <p class="u-error-msg" v-if="showErrors && passwordErrors.currentPassword">{{
+                passwordErrors.newPassword
+              }}</p>
           </div>
           <div class="form-field">
             <label for="repeatPassword">Powtórz hasło</label>
             <InputText id="repeatPassword" placeholder="Powtórzone hasło" type="password"
                        v-model="passwordData.repeatPassword"/>
-            <p v-if="showErrors && passwordErrors.repeatPassword">{{ passwordErrors.repeatPassword }}</p>
+            <p class="u-error-msg" v-if="showErrors && passwordErrors.repeatPassword">{{
+                passwordErrors.repeatPassword
+              }}</p>
           </div>
           <Button type="submit" :disabled="!isFormDirty">Zmień</Button>
         </div>

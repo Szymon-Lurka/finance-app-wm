@@ -33,6 +33,20 @@ const useAuthStore = defineStore('auth', {
             tokenService.clearTokens();
             router.push({name: 'Auth'});
         },
+        async register({email, password, firstName, lastName, username}) {
+            try {
+                await authService.register({
+                    email,
+                    password,
+                    firstName,
+                    lastName,
+                    username
+                })
+            } catch (e) {
+                console.log(e);
+                throw (e);
+            }
+        }
     },
     getters: {
         isAuthenticated: (state) => !!state.token,

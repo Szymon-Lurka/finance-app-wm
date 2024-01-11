@@ -24,12 +24,12 @@ export default defineComponent({
       validationSchema: object({
         firstName: string().min(3,'Imię musi mieć przynajmniej 3 znaki'),
         lastName: string().min(3,'Imię musi mieć przynajmniej 3 znaki'),
-        userName: string().min(3,'Nazwa użytkownika musi mieć przynajmniej 3 znaki')
+        username: string().min(3,'Nazwa użytkownika musi mieć przynajmniej 3 znaki')
       }),
       initialValues: {
         firstName: user.value.firstName,
         lastName: user.value.lastName,
-        userName: user.value.username
+        username: user.value.username
       }
     });
     watch(user, () => {
@@ -37,18 +37,18 @@ export default defineComponent({
         values: {
           firstName: user.value.firstName,
           lastName: user.value.lastName,
-          userName: user.value.username
+          username: user.value.username
         }
       })
     })
     const firstName = useField('firstName');
     const lastName = useField('lastName');
-    const userName = useField('userName');
-    const isUserDataFormDirty = useIsFormDirty([firstName, lastName, userName]);
+    const username = useField('username');
+    const isUserDataFormDirty = useIsFormDirty([firstName, lastName, username]);
     const onSubmitUserData = () => {
       showUserDataErrors.value = true;
-      handleUserDataSubmit(async ({firstName, lastName, userName}) => {
-        const [fName, lName, uName] = [firstName, lastName, userName].map((field) => field === '' ? null : field);
+      handleUserDataSubmit(async ({firstName, lastName, username}) => {
+        const [fName, lName, uName] = [firstName, lastName, username].map((field) => field === '' ? null : field);
         try {
           await userService.updateUser({firstName: fName, lastName: lName, username: uName});
           await userStore.fetchMe();
@@ -84,17 +84,17 @@ export default defineComponent({
           <div class="form-field">
             <label for="firstName">Imię</label>
             <InputText v-model="userData.firstName" id="firstName" type="text" placeholder="Jacek"/>
-            <p v-if="showUserDataErrors && userDataErrors.firstName">{{ userDataErrors.firstName }}</p>
+            <p class="u-error-msg" v-if="showUserDataErrors && userDataErrors.firstName">{{ userDataErrors.firstName }}</p>
           </div>
           <div class="form-field">
             <label for="lastName">Nazwisko</label>
             <InputText v-model="userData.lastName" id="lastName" type="text" placeholder="Kowalski"/>
-            <p v-if="showUserDataErrors && userDataErrors.lastName">{{ userDataErrors.lastName }}</p>
+            <p class="u-error-msg" v-if="showUserDataErrors && userDataErrors.lastName">{{ userDataErrors.lastName }}</p>
           </div>
           <div class="form-field">
-            <label for="userName">Nazwa użytkownika</label>
-            <InputText v-model="userData.userName" id="userName" type="text" placeholder="Jaca"/>
-            <p v-if="showUserDataErrors && userDataErrors.userName">{{ userDataErrors.userName }}</p>
+            <label for="username">Nazwa użytkownika</label>
+            <InputText v-model="userData.username" id="username" type="text" placeholder="Jaca"/>
+            <p class="u-error-msg" v-if="showUserDataErrors && userDataErrors.username">{{ userDataErrors.username }}</p>
           </div>
           <Button type="submit" :disabled="!isUserDataFormDirty">Zmień</Button>
         </div>

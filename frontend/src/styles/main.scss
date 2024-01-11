@@ -1,5 +1,9 @@
 $gutter: 1rem; //for primeflex grid system
 
+.u-error-msg {
+  color: #9e2828;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

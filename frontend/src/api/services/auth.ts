@@ -16,6 +16,9 @@ const authService = {
     },
     getMe() {
         return axiosInstance.get('/api/v1/auth/me');
+    },
+    register: (payload: any) => {
+        return axiosInstance.post('/api/v1/auth/register', payload)
     }
 }
 export {authService}

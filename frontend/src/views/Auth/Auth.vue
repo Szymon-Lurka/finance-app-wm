@@ -48,5 +48,15 @@ div.background {
       width: 85%;
     }
   }
+  :deep(.card-high) {
+    height: 53%;
+    width: 45%;
+    @media(max-width:768px) {
+      width: 90%;
+    }
+  }
+  :deep(.card-high-errors) {
+    height: 60%;
+  }
 }
 </style>
