@@ -7,7 +7,7 @@ const state = reactive({
 
 const useDarkMode = () => {
     const { setItem, getItem } = useCache();
-    const html = document.querySelector('email');
+    const html = document.querySelector('html');
 
     watch(state, () => {
         if (state.isDarkMode) html.classList.add('dark');
