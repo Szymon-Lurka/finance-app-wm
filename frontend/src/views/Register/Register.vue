@@ -49,6 +49,8 @@ export default defineComponent({
     const lastName = useField('lastName');
     const username = useField('username');
 
+    const fields = {password, email, firstName, lastName, username};
+
     const isFormDirty = useIsFormDirty([password, email, firstName, lastName, username]);
 
     const onSubmit = () => {
@@ -61,7 +63,11 @@ export default defineComponent({
           goToLogin();
         } catch (e) {
           console.log(e);
-          toast.add({detail: 'Nie udało się stworzyć konta', severity: 'error', life: 3000, summary: 'Tworzenie konta'})
+          if (e.response.data.isDuplicates) {
+            toast.add({detail: 'Taki użytkownik już istnieje', severity: 'error', life: 3000, summary: 'Tworzenie konta'})
+          } else {
+            toast.add({detail: 'Nie udało się stworzyć konta', severity: 'error', life: 3000, summary: 'Tworzenie konta'})
+          }
         }
       })();
     }

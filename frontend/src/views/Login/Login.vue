@@ -4,10 +4,12 @@ import {useField, useForm} from "vee-validate";
 import {object, string} from "yup";
 import {useAuthStore} from "@/stores/authStore";
 import {useRouter} from "vue-router";
+import {useToast} from "primevue/usetoast";
 
 export default defineComponent({
   setup() {
     const router = useRouter();
+    const toast = useToast();
     const {
       values: login,
       handleSubmit,
@@ -34,6 +36,11 @@ export default defineComponent({
           await authStore.signIn({email, password})
         } catch (e) {
           console.log(e);
+          if (e.response.status === 400 || e.response.status === 404) {
+            toast.add({detail: 'Podane dane są nieprawidłowe', life: 3000, summary: 'Bład logowania', severity: 'error'})
+          } else {
+            toast.add({detail: 'Nie udało się zalogować', life: 3000, summary: 'Bład logowania', severity: 'error'})
+          }
         }
       })();
     }

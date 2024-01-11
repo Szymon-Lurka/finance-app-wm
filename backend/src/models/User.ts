@@ -4,7 +4,7 @@ import {IUser} from "../types/models/User";
 
 
 const userSchema = new Schema<IUser>({
-    username: {type: String, required: [true, 'Please tell us your name!'], unique: true},
+    username: {type: String, required: true},
     password: {type: String, required: true, select: false},
     firstName: {type: String, required: true},
     lastName: {type: String, required: true},

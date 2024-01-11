@@ -29,7 +29,7 @@ const sendErrorProd = (err: BaseError, res: Response) => {
     }
 };
 
-const errorHandler = (err: BaseError | { message: string }, _: unknown, res: Response )=> {
+const errorHandler = (err: BaseError | { message: string; code?: number; keyPattern?: { [key: string]: number } }, _: unknown, res: Response) => {
     if (err instanceof BaseError) {
         if (process.env.NODE_ENV === 'production') {
             sendErrorProd(err, res);
@@ -37,7 +37,14 @@ const errorHandler = (err: BaseError | { message: string }, _: unknown, res: Res
             sendErrorDev(err, res)
         }
     } else {
-        if (err.message) {
+        if (err.code && err.code === 11000) {
+            res.status(400).json({
+                status: 'error',
+                message: err.message,
+                duplicatedFields: err.keyPattern ? Object.keys(err.keyPattern) : [],
+                isDuplicates: true
+            })
+        } else if (err.message) {
             res.status(500).json({
                 status: 'error',
                 message: err.message

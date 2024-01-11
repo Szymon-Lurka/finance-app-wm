@@ -38,7 +38,7 @@ class ValidationError extends BaseError {
 }
 
 class MongoDBError {
-    constructor(public message: string, public name: string) {
+    constructor(public message: string, public name: string, public code: number = 0, public keyPattern: { [key: string]: number }) {
     }
 }
 
@@ -50,7 +50,7 @@ class NotFoundError extends BaseError {
 
 const createMongoDBError = (e: unknown) => {
     const error = e as any as MongoError;
-    return new MongoDBError(error.message, error.name)
+    return new MongoDBError(error.message, error.name, error.code, error.keyPattern)
 }
 
 export {
