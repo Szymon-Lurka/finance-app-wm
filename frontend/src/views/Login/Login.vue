@@ -3,11 +3,9 @@ import {defineComponent} from "vue";
 import {useField, useForm} from "vee-validate";
 import {object, string} from "yup";
 import {useAuthStore} from "@/stores/authStore";
-import {useElNotifications} from "@/composables/useElNotifications";
 
 export default defineComponent({
   setup() {
-    const {dispatchSuccessMessage} = useElNotifications();
     const {
       values: login,
       handleSubmit,
@@ -31,7 +29,6 @@ export default defineComponent({
     const onSubmit = handleSubmit(async ({email, password}) => {
       try {
         await authStore.signIn({email, password})
-        dispatchSuccessMessage('Poprawnie zalogowano')
       } catch (e) {
         console.log(e);
       }
@@ -46,30 +43,17 @@ export default defineComponent({
 </script>
 
 <template>
-  <el-form status-icon label-position="top" class="auth-details__form" @submit.prevent="onSubmit()">
-    <el-form-item label="Email" :error="errors.email">
-      <el-input
-          v-model="login.email"
-          type="text"
-          autocomplete="off"
-          placeholder="email@o2.pl"
-      />
-    </el-form-item>
-    <el-form-item label="Email" :error="errors.password">
-      <el-input
-          v-model="login.password"
-          type="password"
-          autocomplete="off"
-      />
-    </el-form-item>
-    <el-form-item>
-      <el-button
-          type="primary"
-          native-type="submit"
-      >Login
-      </el-button>
-    </el-form-item>
-  </el-form>
+  <form @submit.prevent="onSubmit()">
+    <div class="u-form-field">
+      <label for="email">Email</label>
+      <InputText v-model="login.email" type="text" name="email" id="email"/>
+    </div>
+    <div class="u-form-field">
+      <label for="password">Hasło</label>
+      <InputText v-model="login.password" type="password" name="password" id="password"/>
+    </div>
+    <Button type="submit">Login</Button>
+  </form>
 </template>
 
 <style scoped lang="scss">

@@ -1,19 +1,36 @@
 import {defineStore} from "pinia";
+import {computed} from "vue";
 
 const useUiStore = defineStore('ui', {
     state: () => ({
-        menuStatus: false
+        layoutConfig: {
+            menuMode: 'static',
+            inputStyle: 'outlined',
+        },
+        layoutState: {
+            staticMenuDesktopInactive: false,
+            overlayMenuActive: false,
+            profileSidebarVisible: false,
+            configSidebarVisible: false,
+            staticMenuMobileActive: false,
+            menuHoverActive: false
+        },
     }),
     actions: {
-        toggleMenu() {
-            this.menuStatus = !this.menuStatus;
-        },
-        setMenu(status: boolean) {
-            this.menuStatus = status;
-        },
+        onMenuToggle() {
+            if (this.layoutConfig.menuMode === 'overlay') {
+                this.layoutState.overlayMenuActive = !this.layoutState.overlayMenuActive;
+            }
+
+            if (window.innerWidth > 991) {
+                this.layoutState.staticMenuDesktopInactive = !this.layoutState.staticMenuDesktopInactive;
+            } else {
+                this.layoutState.staticMenuMobileActive = !this.layoutState.staticMenuMobileActive;
+            }
+        }
     },
     getters: {
-        isMenuOpen: (state) => state.menuStatus
+        isSidebarActive: (state) => computed(() => state.layoutState.overlayMenuActive || state.layoutState.staticMenuMobileActive)
     }
 })
 

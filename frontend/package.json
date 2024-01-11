@@ -9,15 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.2.0",
-    "@fortawesome/free-regular-svg-icons": "^6.2.0",
-    "@fortawesome/free-solid-svg-icons": "^6.2.0",
-    "@fortawesome/vue-fontawesome": "^3.0.1",
     "axios": "^1.6.5",
     "dayjs": "^1.11.10",
-    "element-plus": "^2.5.0",
     "env-cmd": "^10.1.0",
     "pinia": "^2.1.7",
+    "primeicons": "^6.0.1",
+    "primevue": "^3.46.0",
     "sass": "^1.69.7",
     "vee-validate": "4.6.7",
     "vue": "^3.3.11",
