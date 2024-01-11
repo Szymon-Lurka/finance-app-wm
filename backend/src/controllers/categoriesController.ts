@@ -51,7 +51,7 @@ const updateCategory = async (req: CustomRequest<{
 const deleteCategory = async (req: Request, res: Response, next: NextFunction) => {
     const categoryID = req.params.id;
     const category = await Category.findOneAndDelete({_id: categoryID});
-    res.status(410).json({
+    res.status(200).json({
         status: 'success',
         message: 'Successfully deleted category',
         deletedCategory: category

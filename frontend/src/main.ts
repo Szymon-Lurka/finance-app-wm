@@ -14,6 +14,15 @@ import StyleClass from 'primevue/styleclass';
 import Card from "primevue/card";
 import Toast from "primevue/toast";
 import ToastService from 'primevue/toastservice';
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Dropdown from "primevue/dropdown";
+import RadioButton from "primevue/radiobutton";
+import Textarea from "primevue/textarea";
+import Toolbar from "primevue/toolbar";
+import Paginator from "primevue/paginator";
+import ColorPicker from "primevue/colorpicker";
 
 const app = createApp(App);
 
@@ -23,6 +32,15 @@ app.component('Badge', Badge);
 app.component('Menubar', Menubar);
 app.component('Card', Card);
 app.component('Toast', Toast);
+app.component('DataTable', DataTable);
+app.component('Column', Column);
+app.component('Dialog', Dialog);
+app.component('Dropdown', Dropdown);
+app.component('RadioButton', RadioButton);
+app.component('Textarea', Textarea);
+app.component('Toolbar', Toolbar);
+app.component('Paginator', Paginator);
+app.component('ColorPicker', ColorPicker);
 
 app.directive('ripple', Ripple)
 app.directive('styleclass', StyleClass);

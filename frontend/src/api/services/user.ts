@@ -1,4 +1,5 @@
 import {axiosInstance} from "@/api";
+import type {UpdateUserPayload} from "@/types/models/Auth";
 
 const userService = {
     getMe: () => {
@@ -7,7 +8,7 @@ const userService = {
     getBalance: () => {
         return axiosInstance.get('/api/v1/auth/balance')
     },
-    updateUser: (payload: any) => {
+    updateUser: (payload: UpdateUserPayload) => {
         return axiosInstance.patch('/api/v1/user', payload);
     }
 }

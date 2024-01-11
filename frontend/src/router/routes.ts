@@ -54,7 +54,17 @@ const routes: RouteRecordRaw[] = [
                 path: '/dashboard/user',
                 name: 'User',
                 component: () => import(/*  webpackChunkName: 'user-page' */  '@/views/User/User.vue')
-            }
+            },
+            {
+                path: '/dashboard/entries',
+                name: 'Entries',
+                component: () => import(/* webpackChunkName: "entries-page" */ '@/views/Entries/Entries.vue'),
+            },
+            {
+                path: '/dashboard/raports',
+                name: 'Raports',
+                component: () => import(/* webpackChunkName: "raports-page" */ '@/views/Raports/Raports.vue'),
+            },
         ]
     }
 ];

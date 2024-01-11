@@ -126,7 +126,7 @@ const register = async (req: CustomRequest<{}, UserBody>, res: Response, next: N
         const user = new User({username, password: hashedPassword, email, firstName, lastName, createdAt});
         await user.save();
     } catch (e) {
-        next(createMongoDBError(e));
+        return next(createMongoDBError(e));
     }
 
     res.status(201).json({
@@ -136,8 +136,14 @@ const register = async (req: CustomRequest<{}, UserBody>, res: Response, next: N
 }
 
 const login = async (req: CustomRequest<{}, LoginUserBody>, res: Response, next: NextFunction) => {
-    const {username, email, password} = req.body;
-    const user = await User.findOne(username ? {username} : {email}).select('+password');
+    const {email, password} = req.body;
+    if (!email) {
+        return next(new BodyFieldsValidationError('Email login', ['email']))
+    }
+    if (!password) {
+        return next(new BodyFieldsValidationError('Email login', ['password']))
+    }
+    const user = await User.findOne({email}).select('+password');
     if (!user) {
         return next(new NotFoundError('Not found', 'User not exists'));
     }

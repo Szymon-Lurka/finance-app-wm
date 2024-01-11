@@ -6,11 +6,13 @@ import {useIsFormDirty} from "@/composables/isFormDirty";
 import {userService} from "@/api/services/user";
 import {PASSWORD_VALIDATION_REGEX} from "@/constants/regexes";
 import {useToast} from "primevue/usetoast";
+import {useToastsService} from "@/composables/toasts";
+import {lang} from "@/constants/lang";
 
 export default defineComponent({
   setup() {
     const showErrors = ref(false);
-    const toast = useToast();
+    const {dispatchErrorToast, dispatchSuccessToast} = useToastsService();
     const {
       values: passwordData,
       handleSubmit: handlePasswordSubmit,
@@ -18,10 +20,10 @@ export default defineComponent({
       resetForm,
     } = useForm({
       validationSchema: object({
-        currentPassword: string().required('Aktualne hasło jest wymagane'),
-        newPassword: string().required('').matches(PASSWORD_VALIDATION_REGEX, 'Hasło musi mieć przynajmniej 8 znaków i zawierać przynajmniej 1 wielką literę, 1 symbol i 1 cyfrę.'),
+        currentPassword: string().required(lang.validation.nameRequired('Aktualne hasło')),
+        newPassword: string().required('').matches(PASSWORD_VALIDATION_REGEX, lang.validation.password),
         repeatPassword: string()
-            .oneOf([yupRef('newPassword'), null], 'Hasła muszą być takie same').required('Hasła muszą być takie same')
+            .oneOf([yupRef('newPassword'), null], lang.validation.repeatPassword).required()
       }),
       initialValues: {
         currentPassword: null,
@@ -39,7 +41,7 @@ export default defineComponent({
       handlePasswordSubmit(async ({currentPassword, newPassword, repeatPassword}) => {
         try {
           await userService.updateUser({currentPassword, newPassword, repeatPassword});
-          toast.add({severity: 'success', summary: 'Aktualizacja', detail: 'Pomyślnie zmieniono hasło', life: 3000})
+          dispatchSuccessToast({title: lang.user.titles.updatePassword, details: lang.user.success.details.updatePassword})
           resetForm({
             values: {
               repeatPassword: null,
@@ -50,12 +52,7 @@ export default defineComponent({
           showErrors.value = false;
         } catch (e) {
           console.log(e);
-          toast.add({
-            severity: 'error',
-            summary: 'Aktualizacja',
-            detail: 'Nie udało się zmienić hasła',
-            life: 3000
-          })
+          dispatchErrorToast({title: lang.user.titles.updatePassword, details: lang.user.error.details.updatePassword})
         }
       })();
     }

@@ -1,12 +1,13 @@
 <script lang="ts">
-import {defineComponent, ref, computed, pushScopeId} from 'vue';
+import {defineComponent, ref} from 'vue';
 import {useField, useForm} from "vee-validate";
 import {object, string} from "yup";
 import {useIsFormDirty} from "@/composables/isFormDirty";
 import {useAuthStore} from "@/stores/authStore";
-import {useToast} from "primevue/usetoast";
 import {useRouter} from "vue-router";
 import {PASSWORD_VALIDATION_REGEX} from "@/constants/regexes";
+import {useToastsService} from "@/composables/toasts";
+import {lang} from "@/constants/lang";
 
 interface Form {
   username: string;
@@ -20,7 +21,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const authStore = useAuthStore();
-    const toast = useToast();
+    const {dispatchSuccessToast, dispatchErrorToast} = useToastsService();
     const canShowErrors = ref(false);
     const {
       values,
@@ -28,11 +29,11 @@ export default defineComponent({
       errors
     } = useForm({
       validationSchema: object({
-        password: string().required('').matches(PASSWORD_VALIDATION_REGEX, 'Hasło musi mieć przynajmniej 8 znaków i zawierać przynajmniej 1 wielką literę, 1 symbol i 1 cyfrę.'),
-        email: string().required('Email jest wymagany').email('Email musi być poprawnym adresem e-mail'),
-        firstName: string().required('Imię jest wymagane').min(3, 'Imię musi mieć przynajmniej 3 znaki'),
-        lastName: string().required('Nazwisko jest wymagane').min(3, 'Imię musi mieć przynajmniej 3 znaki'),
-        username: string().required('Nazwa użytkownika jest wymagana').min(3, 'Nazwa użytkownika musi mieć przynajmniej 3 znaki')
+        password: string().required('').matches(PASSWORD_VALIDATION_REGEX, lang.validation.password),
+        email: string().required('Email jest wymagany').email(lang.validation.email),
+        firstName: string().required('Imię jest wymagane').min(3, lang.validation.min(3, 'Imię')),
+        lastName: string().required('Nazwisko jest wymagane').min(3, lang.validation.min(3, 'Nazwisko')),
+        username: string().required('Nazwa użytkownika jest wymagana').min(3, lang.validation.min(3, 'Nazwa użytkownika'))
       }),
       initialValues: {
         password: null,
@@ -56,12 +57,16 @@ export default defineComponent({
       handleSubmit(async ({password, email, firstName, lastName, username}) => {
         try {
           await authStore.register({email, password, firstName, lastName, username});
-          toast.add({detail: 'Pomyślnie utworzono konto', severity: 'success', life: 3000, summary: 'Tworzenie konta'})
+          dispatchSuccessToast({details: lang.auth.success.details.register, title: lang.auth.titles.register})
           canShowErrors.value = false;
           goToLogin();
         } catch (e) {
           console.log(e);
-          toast.add({detail: 'Nie udało się stworzyć konta', severity: 'error', life: 3000, summary: 'Tworzenie konta'})
+          if (e.response.data.isDuplicates) {
+            dispatchErrorToast({title: lang.auth.titles.register, details: lang.auth.error.details.exists})
+          } else {
+            dispatchErrorToast({title: lang.auth.titles.register, details: lang.auth.error.details.register})
+          }
         }
       })();
     }

@@ -19,8 +19,7 @@ interface RefreshTokenBody {
 }
 
 interface LoginUserBody {
-    username?: string;
-    email?: string;
+    email: string;
     password: string;
 }
 
