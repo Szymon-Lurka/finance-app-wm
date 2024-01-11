@@ -3,9 +3,11 @@ import {defineComponent} from "vue";
 import {useField, useForm} from "vee-validate";
 import {object, string} from "yup";
 import {useAuthStore} from "@/stores/authStore";
+import {useElNotifications} from "@/composables/useElNotifications";
 
 export default defineComponent({
   setup() {
+    const {dispatchSuccessMessage} = useElNotifications();
     const {
       values: login,
       handleSubmit,
@@ -27,9 +29,9 @@ export default defineComponent({
     const authStore = useAuthStore();
 
     const onSubmit = handleSubmit(async ({email, password}) => {
-      console.log(email, password);
       try {
         await authStore.signIn({email, password})
+        dispatchSuccessMessage('Poprawnie zalogowano')
       } catch (e) {
         console.log(e);
       }
