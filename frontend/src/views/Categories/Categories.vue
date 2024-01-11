@@ -5,19 +5,22 @@ import type {DefaultSortDetails} from "@/types/models/Sorting";
 import {defaultSortDetails} from "@/helpers/SortHelpers";
 import type {Category} from "@/types/models/Categories";
 import debounce from 'lodash.debounce';
+import FormsCategory from "@/components/Forms/FormsCategory/FormsCategory.vue";
+import {useToastsService} from "@/composables/toasts";
+import {lang} from "@/constants/lang";
 
 export default defineComponent({
+  components: {FormsCategory},
   setup() {
+    const {dispatchSuccessToast, dispatchErrorToast} = useToastsService();
+
     const sortDetails = ref<DefaultSortDetails>(defaultSortDetails);
-    const paginationDetails = ref({
-      totalCount: 0,
-      totalPages: 0,
-      currentPage: 1,
-      inRow: 0,
-    });
     const searchText = ref('');
     const categories = ref<Category[]>();
     const categoriesTable = ref(null);
+    const manageCategoryDialog = ref(false);
+    const deleteCategoryDialog = ref(false);
+    const selectedID = ref(null);
     const fetchCategories = async (pageSize = 10, page = 1) => {
       try {
         const {data} = await categoriesService.getCategories(
@@ -27,42 +30,75 @@ export default defineComponent({
             sortDetails.value.order,
             searchText.value
         );
-        console.log(data);
-        paginationDetails.value = {
-          currentPage: data.currentPage,
-          totalCount: data.totalCount,
-          inRow: data.totalCount,
-          totalPages: data.totalPages * data.totalCount
-        }
         categories.value = data.results;
       } catch (e) {
         console.log(e);
       }
     }
-    onMounted(async () => {
-      await fetchCategories();
-    })
+    const onDeleteCategory = (id: string) => {
+      deleteCategoryDialog.value = true;
+      selectedID.value = id;
+    };
+    const openNew = () => {
+      selectedID.value = null;
+      manageCategoryDialog.value = true;
+    };
     const onSort = (sortEvent) => {
       sortDetails.value.order = sortEvent.sortOrder;
       sortDetails.value.parameter = sortEvent.sortField;
       fetchCategories();
     }
 
-    const onPagination = (x) => {
-        console.log(x);
-  }
+    const editCategory = (id: string) => {
+      manageCategoryDialog.value = true;
+      selectedID.value = id;
+    }
+
+    const refresh = () => {
+      manageCategoryDialog.value = false;
+      selectedID.value = null;
+      fetchCategories();
+    }
 
     const searchCategories = debounce(async () => {
       await fetchCategories();
     }, 500);
+
+    const refuseToDelete = () => {
+      deleteCategoryDialog.value = false;
+      selectedID.value = false;
+    }
+
+    const deleteCategory = async () => {
+      deleteCategoryDialog.value = false;
+      try {
+        await categoriesService.deleteCategory(selectedID.value);
+        await fetchCategories();
+        dispatchSuccessToast({title: lang.categories.titles.deleting, details: lang.categories.success.details.deleting});
+      } catch (e) {
+        dispatchErrorToast({title: lang.categories.titles.deleting, details: lang.categories.error.details.deleting});
+      }
+    }
+
+    onMounted(async () => {
+      await fetchCategories();
+    })
+
     return {
       categories,
       categoriesTable,
       onSort,
       searchText,
       searchCategories,
-      paginationDetails,
-      onPagination,
+      openNew,
+      refresh,
+      editCategory,
+      selectedID,
+      manageCategoryDialog,
+      deleteCategoryDialog,
+      deleteCategory,
+      refuseToDelete,
+      onDeleteCategory
     }
   }
 })
@@ -74,12 +110,11 @@ export default defineComponent({
       <div class="card">
         <Toolbar class="mb-4">
           <template #start>
-            <Button label="Nowa" icon="pi pi-plus" severity="success" class="mr-2"/>
+            <Button label="Nowa" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew"/>
           </template>
         </Toolbar>
-        <DataTable lazy ref="categoriesTable" :value="categories" dataKey="id" :rows="10"
-                   :rows-per-page-options="[2,5,10,20,50]"
-                   :filters="filters" @sort="onSort">
+        <DataTable ref="categoriesTable" :value="categories" dataKey="id" :rows="10"
+                   @sort="onSort">
           <template #header>
             <div class="flex justify-content-end">
               <span class="p-input-icon-left">
@@ -91,11 +126,33 @@ export default defineComponent({
           <template #empty>Brak kategorii</template>
           <Column field="name" header="Nazwa" sortable style="width: 25%"/>
           <Column field="description" header="Opis" sortable/>
-          <Column field="color" header="Kolor" sortable style="width:10%">
+          <Column field="color" header="Kolor" style="width:10%">
             <template #body="{data}"><span class="round" :style="{'background-color': data.color}"/></template>
+          </Column>
+          <Column header="Akcje" style="width:10%">
+            <template #body="{data}">
+              <div class="actions">
+                <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editCategory(data._id)"/>
+                <Button icon="pi pi-trash" outlined rounded class="mr-2" @click="onDeleteCategory(data._id)"/>
+              </div>
+            </template>
           </Column>
         </DataTable>
       </div>
+      <Dialog close-on-escape v-model:visible="manageCategoryDialog" :header="`${!!selectedID ? 'Edycja' : 'Dodawanie'} kategorii`"
+              :modal="true" style="width:450px;">
+        <FormsCategory @changed="refresh" :id="selectedID"/>
+      </Dialog>
+      <Dialog v-model:visible="deleteCategoryDialog" header="Usuwanie kategorii">
+        <div class="confirmation-content">
+          <i class="pi pi-exclamation-triangle mr-3"/>
+          <span>Na pewno chcesz usunąć kategorie?</span>
+        </div>
+        <template #footer>
+          <Button label="Nie" icon="pi pi-times" text @click="refuseToDelete"/>
+          <Button label="Tak" icon="pi pi-check" text @click="deleteCategory"/>
+        </template>
+      </Dialog>
     </div>
   </div>
 
@@ -123,5 +180,9 @@ div.category {
   height: 15px;
   display: inline-block;
   border-radius: 50%;
+}
+
+.actions {
+  display: flex;
 }
 </style>

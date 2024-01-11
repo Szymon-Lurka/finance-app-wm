@@ -7,11 +7,13 @@ import {useToast} from "primevue/usetoast";
 import {User} from "@/types/models/Auth";
 import {useIsFormDirty} from "@/composables/isFormDirty";
 import {userService} from "@/api/services/user";
+import {lang} from "@/constants/lang";
+import {useToastsService} from "@/composables/toasts";
 
 export default defineComponent({
   setup() {
     const userStore = useUserStore();
-    const toast = useToast();
+    const {dispatchErrorToast, dispatchSuccessToast} = useToastsService();
     const user = computed(() => userStore.getUser as User);
     const showUserDataErrors = ref(false);
 
@@ -22,9 +24,9 @@ export default defineComponent({
       resetForm
     } = useForm({
       validationSchema: object({
-        firstName: string().min(3,'Imię musi mieć przynajmniej 3 znaki'),
-        lastName: string().min(3,'Imię musi mieć przynajmniej 3 znaki'),
-        username: string().min(3,'Nazwa użytkownika musi mieć przynajmniej 3 znaki')
+        firstName: string().min(3,lang.validation.min(3,'Imię')),
+        lastName: string().min(3,lang.validation.min(3,'Nazwisko')),
+        username: string().min(3,lang.validation.min(3,'Nazwa użytkownika'))
       }),
       initialValues: {
         firstName: user.value.firstName,
@@ -52,15 +54,10 @@ export default defineComponent({
         try {
           await userService.updateUser({firstName: fName, lastName: lName, username: uName});
           await userStore.fetchMe();
-          toast.add({severity: 'success', summary: 'Aktualizacja', detail: 'Pomyślnie zaktualizowano dane', life: 3000})
+          dispatchSuccessToast({details: lang.user.success.details.updateData, title: lang.user.titles.updateData})
         } catch (e) {
           console.log(e);
-          toast.add({
-            severity: 'error',
-            summary: 'Aktualizacja',
-            detail: 'Nie udało się zaktualizować danych',
-            life: 3000
-          })
+          dispatchErrorToast({title: lang.user.titles.updateData, details: lang.user.error.details.updateData})
         }
       })();
     }

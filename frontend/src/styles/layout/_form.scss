@@ -1,0 +1,24 @@
+.u-error-msg {
+  color: #9e2828;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+
+  & .form-field {
+    &.flex {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    width: 100%;
+
+    input {
+      width: 100%;
+    }
+  }
+}

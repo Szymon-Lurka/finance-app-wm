@@ -4,20 +4,21 @@ import {useField, useForm} from "vee-validate";
 import {object, string} from "yup";
 import {useAuthStore} from "@/stores/authStore";
 import {useRouter} from "vue-router";
-import {useToast} from "primevue/usetoast";
+import {useToastsService} from "@/composables/toasts";
+import {lang} from "@/constants/lang";
 
 export default defineComponent({
   setup() {
     const router = useRouter();
-    const toast = useToast();
+    const {dispatchErrorToast} = useToastsService();
     const {
       values: login,
       handleSubmit,
       errors
     } = useForm({
       validationSchema: object({
-        email: string().required('Email jest wymagany').email('Email jest nieprawidłowy'),
-        password: string().required('Hasło jest wymagane').min(8, 'Hasło musi zawierać conajmniej 8 znaków')
+        email: string().required(lang.validation.nameRequired('Email')).email(lang.validation.email),
+        password: string().required('Hasło jest wymagane').min(8, lang.validation.min(8, 'Hasło'))
       }),
       initialValues: {
         email: '',
@@ -37,9 +38,9 @@ export default defineComponent({
         } catch (e) {
           console.log(e);
           if (e.response.status === 400 || e.response.status === 404) {
-            toast.add({detail: 'Podane dane są nieprawidłowe', life: 3000, summary: 'Bład logowania', severity: 'error'})
+            dispatchErrorToast({title: lang.auth.titles.login, details: lang.auth.error.details.exists});
           } else {
-            toast.add({detail: 'Nie udało się zalogować', life: 3000, summary: 'Bład logowania', severity: 'error'})
+            dispatchErrorToast({title: lang.auth.titles.login, details: lang.auth.error.details.login});
           }
         }
       })();

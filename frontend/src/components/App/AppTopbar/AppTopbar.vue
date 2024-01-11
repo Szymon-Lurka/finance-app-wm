@@ -97,16 +97,16 @@ export default defineComponent({
       <badge v-if="balance" size="large" :severity="balance > 0 ? 'success' : 'danger'">
         {{ balance }} zł
       </badge>
-      <badge v-else>
+      <badge v-else size="large">
         0 zł
       </badge>
       <button @click="onUserClick()" class="p-link layout-topbar-button">
         <i class="pi pi-user"></i>
-        <span>Profile</span>
+        <span>Profil</span>
       </button>
       <button class="p-link layout-topbar-button" @click="onLogout">
         <i class="pi pi-power-off"></i>
-        <span>Logout</span>
+        <span>Wyloguj</span>
       </button>
     </div>
   </div>
