@@ -38,17 +38,15 @@ export default defineComponent({
   <div>
     <h2>Kategorie:</h2>
     <div class="categories">
-      <div class="category" v-for="category in categories">
-        <p>
+      <el-card class="category" v-for="category in categories">
+        <template #header>
           {{ category.name }}
-        </p>
-        <p>
-          {{ category.description }}
-        </p>
-      </div>
+        </template>
+        {{ category.description }}
+      </el-card>
     </div>
   </div>
-  Categories
+
 </template>
 
 <style scoped lang="scss">
