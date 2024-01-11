@@ -1,6 +1,19 @@
 $gutter: 1rem; //for primeflex grid system
 
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
 
+  & .form-field {
+    width: 100%;
+
+    input {
+      width: 100%;
+    }
+  }
+}
 @import './layout/layout.scss';
 @import 'primeflex/primeflex.scss';
 @import 'primeicons/primeicons.css';

@@ -13,6 +13,9 @@ const authService = {
         return axiosInstance.post('/api/v1/auth/refresh-token', {
             refreshToken: tokenService.getToken(Tokens.refresh)
         })
+    },
+    getMe() {
+        return axiosInstance.get('/api/v1/auth/me');
     }
 }
 export {authService}

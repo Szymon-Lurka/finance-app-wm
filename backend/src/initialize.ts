@@ -14,7 +14,7 @@ const initializeApp = () => {
     connectToDB();
 
     const limiter = rateLimit({
-        limit: 100,
+        limit: 20000,
         windowMs: 5 * 60 * 1000,
         standardHeaders: 'draft-7',
         legacyHeaders: false,
