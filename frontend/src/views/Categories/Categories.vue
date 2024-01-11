@@ -38,12 +38,10 @@ export default defineComponent({
   <div>
     <h2>Kategorie:</h2>
     <div class="categories">
-      <el-card class="category" v-for="category in categories">
-        <template #header>
-          {{ category.name }}
-        </template>
+      <div class="category" v-for="category in categories">
+        {{ category.name }}
         {{ category.description }}
-      </el-card>
+      </div>
     </div>
   </div>
 

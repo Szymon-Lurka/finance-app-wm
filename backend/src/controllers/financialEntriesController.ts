@@ -124,7 +124,7 @@ const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntrie
         amountTo: ['amount'],
         type: ['type'],
         categoryId: 'categoryId'
-    }) as any;
+    });
 
     const facets = getFacets({
         pageSize,
