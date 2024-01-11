@@ -1,4 +1,4 @@
-type SortOrder = 'ascending' | 'descending';
+type SortOrder = -1 | 1 | '-1' | '1';
 
 interface DefaultSortDetails {
     order: SortOrder;
