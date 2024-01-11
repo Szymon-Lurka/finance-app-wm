@@ -1,27 +1,83 @@
 <script lang="ts">
-import {defineComponent, ref} from "vue";
+import {computed, defineComponent, ref, watch} from "vue";
 import AppNavigation from "@/components/App/AppNavigation/AppNavigation.vue";
+import AppTopbar from "@/components/App/AppTopbar/AppTopbar.vue";
+import {useUiStore} from "@/stores/uiStore";
 
 export default defineComponent({
-  components: {AppNavigation},
+  components: {AppNavigation, AppTopbar},
+  setup() {
+    const uiStore = useUiStore();
+    const layoutState = uiStore.layoutState;
+    const outsideClickListener = ref(null);
+
+    watch(uiStore.isSidebarActive, (newVal) => {
+      if (newVal) {
+        bindOutsideClickListener();
+      } else {
+        unbindOutsideClickListener();
+      }
+    });
+    const bindOutsideClickListener = () => {
+      if (!outsideClickListener.value) {
+        outsideClickListener.value = (event) => {
+          if (isOutsideClicked(event)) {
+            layoutState.overlayMenuActive = false;
+            layoutState.staticMenuMobileActive = false;
+            layoutState.menuHoverActive = false;
+          }
+        };
+        document.addEventListener('click', outsideClickListener.value);
+      }
+    };
+    const unbindOutsideClickListener = () => {
+      if (outsideClickListener.value) {
+        document.removeEventListener('click', outsideClickListener.value);
+        outsideClickListener.value = null;
+      }
+    };
+    const isOutsideClicked = (event) => {
+      const sidebarEl = document.querySelector('.layout-sidebar');
+      const topbarEl = document.querySelector('.layout-menu-button');
+
+      return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
+    };
+
+    const layoutConfig = uiStore.layoutConfig;
+    const containerClass = computed(() => {
+      return {
+        'layout-overlay': layoutConfig.menuMode === 'overlay',
+        'layout-static': layoutConfig.menuMode === 'static',
+        'p-input-filled': layoutConfig.inputStyle === 'filled',
+        'layout-static-inactive': layoutState.staticMenuDesktopInactive && layoutConfig.menuMode === 'static',
+        'layout-mobile-active': layoutState.staticMenuMobileActive,
+      };
+    });
+    return {
+      containerClass
+    }
+  }
 })
 </script>
 
 <template>
-  <div class="app">
-    <app-navigation/>
-    <main class="app__content">
-      <div class="app__content-inner">
+  <div class="layout-wrapper" :class="containerClass">
+    <app-topbar></app-topbar>
+    <div class="layout-sidebar">
+      <app-navigation/>
+    </div>
+    <div class="layout-main-container">
+      <div class="layout-main">
         <router-view v-slot="{Component, route}">
           <transition name="fade" mode="out-in">
             <div :key="route.name">
               <component :is="Component"/>
             </div>
           </transition>
-
         </router-view>
       </div>
-    </main>
+    </div>
+    <div class="layout-mask"></div>
+
   </div>
 </template>
-<style src="./Dashboard.scss" scoped lang="scss"></style>

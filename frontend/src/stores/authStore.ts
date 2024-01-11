@@ -25,6 +25,7 @@ const useAuthStore = defineStore('auth', {
                 router.push({name: 'Dashboard'})
             } catch (e) {
                 console.log(e);
+                throw e;
             }
         },
         signOut() {
