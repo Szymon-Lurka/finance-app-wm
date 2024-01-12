@@ -9,25 +9,26 @@ import {lang} from "@/constants/lang";
 import FormsCategory from "@/components/Forms/FormsCategory/FormsCategory.vue";
 import {useToastsService} from "@/composables/toasts";
 import {useUserStore} from "@/stores/userStore";
-import type {Category} from "@/types/models/Categories";
 import FormsEntry from "@/components/Forms/FormsEntry/FormsEntry.vue";
 import dayjs from "dayjs";
+import AppPagination from "@/components/App/AppPagination/AppPagination.vue";
+import type {Pagination} from "@/types/models/Pagination";
+import {defaultPagination} from "@/helpers/PaginationHelpers";
 
 export default defineComponent({
-  components: {FormsEntry, FormsCategory},
+  components: {AppPagination, FormsEntry, FormsCategory},
   setup() {
     const {dispatchSuccessToast, dispatchErrorToast} = useToastsService();
     const userStore = useUserStore();
-
+    const paginationDetails = ref<Pagination>(defaultPagination);
     const sortDetails = ref<DefaultSortDetails>(defaultSortDetails);
-    const category = ref<Category>();
     const searchText = ref('');
     const financialEntries = ref<Entry[]>([]);
     const totalAmount = ref(0);
     const selectedID = ref(null);
     const manageEntryDialog = ref(false);
     const deleteEntryDialog = ref(false);
-    const fetchFinancialEntries = async (fetchBalance = true, pageSize = 10, page = 1) => {
+    const fetchFinancialEntries = async (fetchBalance = true, pageSize = 1, page = 1) => {
       try {
         await userStore.fetchBalance();
         const {data} = await financialEntriesService.getFinancialEntries(
@@ -39,6 +40,9 @@ export default defineComponent({
         );
         financialEntries.value = data.results;
         totalAmount.value = data.totalAmount;
+        paginationDetails.value.page = data.currentPage;
+        paginationDetails.value.totalCount = data.totalCount;
+        paginationDetails.value.totalPages = data.totalPages;
       } catch (e) {
         console.log(e);
       }
@@ -87,6 +91,11 @@ export default defineComponent({
         dispatchErrorToast({title: lang.entries.titles.deleting, details: lang.entries.error.details.deleting});
       }
     }
+
+    const onPageChange = (page: number) => {
+      paginationDetails.value.page = page;
+      fetchFinancialEntries(true, paginationDetails.value.pageSize, paginationDetails.value.page);
+    }
     const openNew = () => {
       selectedID.value = null;
       manageEntryDialog.value = true;
@@ -107,7 +116,9 @@ export default defineComponent({
       refuseToDelete,
       onDeleteEntry,
       searchEntries,
-      dayjs
+      dayjs,
+      paginationDetails,
+      onPageChange
     }
   }
 })
@@ -172,6 +183,11 @@ export default defineComponent({
               </div>
             </template>
           </Column>
+          <template #footer>
+            <AppPagination :total-items="paginationDetails.totalCount" :items-per-page="paginationDetails.pageSize"
+                           :items-per-page-options="[1,2,5,10,15]"
+                           :current-page="paginationDetails.page" @page-change="onPageChange"/>
+          </template>
         </DataTable>
         <Dialog close-on-escape v-model:visible="manageEntryDialog"
                 :header="`${!!selectedID ? 'Edycja' : 'Dodawanie'} wpisu`"
