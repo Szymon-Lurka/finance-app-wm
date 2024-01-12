@@ -15,8 +15,10 @@ import AppPagination from "@/components/App/AppPagination/AppPagination.vue";
 import type {Pagination} from "@/types/models/Pagination";
 import {defaultPagination} from "@/helpers/PaginationHelpers";
 import type {FinancialEntryType} from "@/types/types/FinancialEntry";
+import {formatAmount} from "@/helpers/formatAmount";
 
 export default defineComponent({
+  methods: {formatAmount},
   components: {AppPagination, FormsEntry, FormsCategory},
   setup() {
     const {dispatchSuccessToast, dispatchErrorToast} = useToastsService();
@@ -161,7 +163,8 @@ export default defineComponent({
       onPageChange,
       onItemsOnPageChange,
       typeFilter,
-      typeFilterOptions
+      typeFilterOptions,
+      formatAmount
     }
   }
 })
@@ -205,10 +208,10 @@ export default defineComponent({
 
           <Column field="name" header="Nazwa" sortable style="width: 25%"/>
           <Column field="description" header="Opis" sortable style="width:25%; max-width:25%"/>
-          <Column header="Kwota" sortable>
+          <Column header="Kwota" sortable style="width:15%">
             <template #body="{data}">
               <badge :severity="data.amount > 0 ? 'success' : 'danger'">
-                {{ data.amount }} zł
+                {{ formatAmount(data.amount) }} zł
               </badge>
             </template>
           </Column>

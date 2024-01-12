@@ -1,175 +1,155 @@
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
-import { raportsService } from '@/api/services/raports';
-import type { FinancialEntryType } from '@/types/types/FinancialEntry';
+import {defineComponent, onMounted, ref} from 'vue';
+import {raportsService} from '@/api/services/raports';
+import dayjs from "dayjs";
+import {formatAmount} from "@/helpers/formatAmount";
 
 export default defineComponent({
   setup() {
-    const balanceTotalAmount = ref(0);
-    const balanceEntries = ref();
-    const balanceExpensesAmount = ref(0);
-    const balanceIncomesAmount = ref(0);
-    const balanceExpensesEntries = ref();
-    const balanceIncomesEntries = ref();
+    const totalAmount = ref(0);
+    const totalExpensesAmount = ref(0);
+    const totalIncomesAmount = ref(0);
+    const entries = ref([]);
+    const diffEntries = ref({});
+    const categoriesTotalIncomeExpense = ref({});
+    const categoriesExpenseIncome = ref([]);
+    const categoriesDates = ref({});
+    const categoriesAmounts = ref({});
 
-    const categoriesExpenses = ref({});
-    const categoriesIncomes = ref({});
-    const categoriesCombined = ref({});
-
-    const categoriesAmountByDates = ref([]);
-
-    const createDataForChart = (entries, dataSet) => {
-      entries.value.forEach((entry) => {
-        if (!entry.categories) {
-          if (!dataSet.value['none']) {
-            dataSet.value['none'] = {
-              name: null,
-              amount: entry.amount,
-              color: 'black',
-            };
-          } else {
-            dataSet.value['none'].amount += entry.amount;
+    const prepareDiffEntries = (dEntries) => {
+      const incomeEntry = dEntries.filter((entry) => entry._id === 'income')?.[0] || {totalAmount: 0};
+      const expanseEntry = dEntries.filter((entry) => entry._id === 'expense')?.[0] || {totalAmount: 0};
+      const totalSum = dEntries.reduce((sum, entry) => sum + Math.abs(entry.totalAmount), 0);
+      return {
+        labels: ['Przychody', 'Wydatki'],
+        datasets: [
+          {
+            data: [Math.round(Math.abs(incomeEntry.totalAmount / totalSum) * 100), Math.round(Math.abs(expanseEntry.totalAmount / totalSum) * 100)],
+            backgroundColor: ['#3fba8d', '#c44755']
           }
-        } else {
-          if (!dataSet?.value?.[entry.categories._id]) {
-            dataSet.value[entry.categories._id] = {
-              name: entry.categories.name,
-              color: entry.categories.color,
-              amount: entry.amount,
-            };
-          } else {
-            dataSet.value[entry.categories._id].amount += entry.amount;
+        ]
+      }
+    };
+
+    const prepareCategoriesTotalIncomeExpense = (cEntries) => {
+      return {
+        labels: cEntries.map((entry) => entry._id),
+        datasets: [
+          {
+            label: 'Przychody',
+            data: cEntries.map((entry) => entry.totalIncome.toFixed(2)),
+            backgroundColor: ['#3fba8d']
+          },
+          {
+            label: 'Wydatki',
+            data: cEntries.map((entry) => entry.totalExpense.toFixed(2)),
+            backgroundColor: ['#c44755']
+          }
+        ]
+      }
+    }
+    const prepareCategoriesDates = (cEntries) => {
+      const categories = [...new Set(cEntries.map((entry) => entry._id.category))];
+      const dates = [...new Set(cEntries.map((entry) => entry._id.date))];
+      // @ts-ignore
+      dates.sort((a, b) => new Date(a) - new Date(b));
+      const datasets = [];
+
+      categories.forEach((category) => {
+        const dataPoints = dates.map((date) => {
+          const entry = cEntries.find((d) => d._id.date === date && d._id.category === category);
+          return entry ? entry.totalAmount : 0;
+        });
+        datasets.push({
+          label: category,
+          backgroundColor: cEntries.find((d) => d._id.category === category)?._id.color,
+          data: dataPoints
+        })
+      })
+
+      return {
+        //@ts-ignore
+        labels: dates.map((date) => dayjs(date).format('MM/DD/YYYY')),
+        datasets
+      }
+    }
+    const prepareCategoriesAmount = (cEntries) => {
+      const totalSum = cEntries.reduce((sum, entry) => sum + Math.abs(entry.totalAmount), 0);
+
+      const datasets = [{
+        data: cEntries.map((entry) => Math.round(Math.abs(entry.totalAmount / totalSum) * 100)),
+        backgroundColor: cEntries.map((entry) => entry._id.color)
+      }];
+
+      const chartData = {
+        labels: cEntries.map((entry) => entry._id.category),
+        datasets
+      }
+
+      return chartData;
+    }
+
+    const percentageOptions = {
+      aspectRatio: 1,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const value = context.parsed;
+              return `${value}%`
+            }
           }
         }
-      });
+      }
     };
 
-    const diffChartData = computed(() => ({
-      labels: ['WYDATKI', 'PRZYCHODY'],
-      datasets: [
-        {
-          data: [balanceExpensesAmount.value, balanceIncomesAmount.value],
-          backgroundColor: ['#c44755', '#3fba8d'],
-        },
-      ],
-    }));
-
-    const categoriesChartData = computed(() => ({
-      labels: Object.values(categoriesCombined.value).map((item) =>
-        item.name ? item.name : 'Bez kategorii'
-      ),
-      datasets: [
-        {
-          data: Object.values(categoriesCombined.value).map((item) => item.amount),
-          backgroundColor: Object.values(categoriesCombined.value).map((item) => item.color),
-        },
-      ],
-    }));
-
-    const categoriesExpensesChartData = computed(() => ({
-      labels: Object.values(categoriesExpenses.value).map((item) =>
-        item.name ? item.name : 'Bez kategorii'
-      ),
-      datasets: [
-        {
-          data: Object.values(categoriesExpenses.value).map((item) => item.amount),
-          backgroundColor: Object.values(categoriesExpenses.value).map((item) => item.color),
-        },
-      ],
-    }));
-
-    const categoriesIncomesChartData = computed(() => ({
-      labels: Object.values(categoriesIncomes.value).map((item) =>
-        item.name ? item.name : 'Bez kategorii'
-      ),
-      datasets: [
-        {
-          data: Object.values(categoriesIncomes.value).map((item) => item.amount),
-          backgroundColor: Object.values(categoriesIncomes.value).map((item) => item.color),
-        },
-      ],
-    }));
-
-    const stackedBarConfig = {
-      labels: ['2023-02-02', '2023-02-03', '2023-02-02', '2023-02-03', '2023-02-02', '2023-02-03'],
-      datasets: [
-        {
-          label: 'KAtegoria 1',
-          data: [145, 42, 42, 5, 63, 1, 3],
-          backgroundColor: 'red',
-          stack: 'Stack 0',
-        },
-        {
-          label: 'KAtegoria 2',
-          data: [-242, -502, 4, 564, 523, 1],
-          backgroundColor: 'yellow',
-          stack: 'Stack 1',
-        },
-        {
-          label: 'KAtegoria 3',
-          data: [600, -212, 45, 23, -523, 2],
-          backgroundColor: 'green',
-          stack: 'Stack 2',
-        },
-        {
-          label: 'KAtegoria 3',
-          data: [110, -25, 45, 23, -523, 2],
-          backgroundColor: 'gray',
-          stack: 'Stack 3',
-        },
-        {
-          label: 'KAtegoria 3',
-          data: [50, -245, 45, 23, -523, 2],
-          backgroundColor: 'blue',
-          stack: 'Stack 4',
-        },
-      ],
+    const currencyOptions = {
+      aspectRatio: 1,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const value = context.parsed;
+              return `${formatAmount(value.y)} PLN`
+            }
+          }
+        }
+      }
     };
 
-    const getExpensesFromDiff = (diffEntries: any[], type: FinancialEntryType): number => {
-      if (!diffEntries || (diffEntries.length && diffEntries.length < 1)) return 0;
-      const entry = diffEntries.find((entry) => entry._id === type);
-      if (!entry) return 0;
-      return entry.totalAmount;
-    };
     const fetchBalance = async () => {
       try {
-        const { data } = await raportsService.getBalance();
+        const {data} = await raportsService.getBalance();
+        totalAmount.value = data.totalAmount;
+        entries.value = data.entries;
+        diffEntries.value = prepareDiffEntries(data.diffEntries || []);
+        totalExpensesAmount.value = data.diffEntries.find((entry) => entry._id === 'expense')?.totalAmount || 0;
+        totalIncomesAmount.value = data.diffEntries.find((entry) => entry._id === 'income')?.totalAmount || 0;
+        categoriesTotalIncomeExpense.value = prepareCategoriesTotalIncomeExpense(data.categoriesTotalIncomeExpense || []);
+        categoriesExpenseIncome.value = data.categoriesExpenseIncome;
+        categoriesDates.value = prepareCategoriesDates(data.categoriesDates || []);
+        categoriesAmounts.value = prepareCategoriesAmount(data.categoriesAmounts || []);
+        console.log(categoriesTotalIncomeExpense.value);
       } catch (e) {
         console.log(e);
       }
     };
 
-    const setChartOptions = () => {
-      const documentStyle = getComputedStyle(document.documentElement);
-      const textColor = documentStyle.getPropertyValue('--text-color');
-
-      return {
-        tooltip: {
-          enabled: false,
-          titleColor: 'red',
-        },
-        legend: {
-          labels: {
-            usePointStyle: true,
-            color: textColor,
-          },
-        },
-      };
-    };
     onMounted(async () => {
       await fetchBalance();
     });
     return {
-      diffChartData,
-      setChartOptions,
-      categoriesChartData,
-      categoriesExpensesChartData,
-      categoriesIncomesChartData,
-      balanceTotalAmount,
-      balanceExpensesAmount,
-      balanceIncomesAmount,
-      stackedBarConfig,
+      totalAmount,
+      diffEntries,
+      categoriesTotalIncomeExpense,
+      categoriesDates,
+      categoriesAmounts,
+      percentageOptions,
+      currencyOptions,
+      formatAmount,
+      totalExpensesAmount,
+      totalIncomesAmount
     };
   },
 });
@@ -181,14 +161,17 @@ export default defineComponent({
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>
-            <span class="block-text-500 font-medium mb-3">Twój bilans z ostatniego tygodnia</span>
-            <div class="text-900 font-medium text-xl">{{ balanceTotalAmount }} zł</div>
+            <span class="block-text-500 font-medium mb-3">Bilans</span>
+            <div class="text-900 font-medium text-xl"
+                 :style="{'color': totalAmount > 0 ? '#3fba8d !important' : '#c44755 !important'}">
+              {{ formatAmount(totalAmount) }} zł
+            </div>
           </div>
           <div
-            class="flex align-items-center justify-content-center bg-blue-100 border-round"
-            style="width: 2.5rem; height: 2.5rem"
+              class="flex align-items-center justify-content-center bg-blue-100 border-round"
+              style="width: 2.5rem; height: 2.5rem"
           >
-            <i class="pi pi-dollar text-blue-500 text-xl" />
+            <i class="pi pi-dollar text-blue-500 text-xl"/>
           </div>
         </div>
       </div>
@@ -197,14 +180,16 @@ export default defineComponent({
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>
-            <span class="block-text-500 font-medium mb-3">W ostatnim tygodniu wydałeś</span>
-            <div class="text-900 font-medium text-xl">{{ Math.abs(balanceExpensesAmount) }} zł</div>
+            <span class="block-text-500 font-medium mb-3">Wydatki</span>
+            <div class="text-900 font-medium text-xl" :style="{'color': '#c44755 !important'}">
+              {{ formatAmount(Math.abs(totalExpensesAmount)) }} zł
+            </div>
           </div>
           <div
-            class="flex align-items-center justify-content-center bg-blue-100 border-round"
-            style="width: 2.5rem; height: 2.5rem"
+              class="flex align-items-center justify-content-center bg-blue-100 border-round"
+              style="width: 2.5rem; height: 2.5rem"
           >
-            <i class="pi pi-dollar text-blue-500 text-xl" />
+            <i class="pi pi-dollar text-blue-500 text-xl"/>
           </div>
         </div>
       </div>
@@ -213,14 +198,17 @@ export default defineComponent({
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>
-            <span class="block-text-500 font-medium mb-3">Na twoje konto wpłynęło</span>
-            <div class="text-900 font-medium text-xl">{{ balanceIncomesAmount }} zł</div>
+            <span class="block-text-500 font-medium mb-3">Przychody</span>
+            <div class="text-900 font-medium text-xl" :style="{'color': '#3fba8d !important'}">{{
+                formatAmount(Math.abs(totalIncomesAmount))
+              }} zł
+            </div>
           </div>
           <div
-            class="flex align-items-center justify-content-center bg-blue-100 border-round"
-            style="width: 2.5rem; height: 2.5rem"
+              class="flex align-items-center justify-content-center bg-blue-100 border-round"
+              style="width: 2.5rem; height: 2.5rem"
           >
-            <i class="pi pi-dollar text-blue-500 text-xl" />
+            <i class="pi pi-dollar text-blue-500 text-xl"/>
           </div>
         </div>
       </div>
@@ -229,45 +217,40 @@ export default defineComponent({
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>
-            <span class="block-text-500 font-medium mb-3">Najwięcej wydałeś w kategorii</span>
+            <span class="block-text-500 font-medium mb-3">whatever</span>
             <div class="text-900 font-medium text-xl">XYZ</div>
           </div>
           <div
-            class="flex align-items-center justify-content-center bg-blue-100 border-round"
-            style="width: 2.5rem; height: 2.5rem"
+              class="flex align-items-center justify-content-center bg-blue-100 border-round"
+              style="width: 2.5rem; height: 2.5rem"
           >
-            <i class="pi pi-dollar text-blue-500 text-xl" />
+            <i class="pi pi-dollar text-blue-500 text-xl"/>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-12 lg:col-6 xl:col-4">
+    <div class="col-12 lg:col-6 xl:col-6">
       <div class="card card-chart">
         <h2>Dochody</h2>
-        <Chart type="pie" :data="diffChartData" :plugins="setChartOptions" />
+        <Chart type="pie" :data="diffEntries" :options="percentageOptions"/>
       </div>
     </div>
-    <div class="col-12 lg:col-6 xl:col-4">
+    <div class="col-12 lg:col-6 xl:col-6">
       <div class="card card-chart">
         <h2>Dochody w kategoriach</h2>
-        <Chart type="doughnut" :data="categoriesChartData" :plugins="setChartOptions" />
+        <Chart type="pie" :data="categoriesAmounts" :options="percentageOptions"/>
       </div>
     </div>
-    <div class="col-12 lg:col-6 xl:col-4">
-      <div class="card card-chart">
-        <h2>Dochody w kategoriach</h2>
-        <Chart type="doughnut" :data="categoriesChartData" :plugins="setChartOptions" />
-      </div>
-    </div>
+
     <div class="col-12 xl:col-12">
       <div class="card card-chart">
-        <h2>Wydatki w kategoriach</h2>
-        <Chart type="bar" style="width: 100%" :data="stackedBarConfig" :plugins="setChartOptions" />
+        <h2>Bilans kategorii</h2>
+        <Chart type="bar" :data="categoriesTotalIncomeExpense" style="width: 100%; height:500px;" :options="currencyOptions"/>
       </div>
       <div class="card card-chart">
-        <h2>Przychody w kategoriach</h2>
-        <Chart type="pie" :data="categoriesIncomesChartData" :plugins="setChartOptions" />
+        <h2>Bilans kategorii według daty</h2>
+        <Chart type="bar" :data="categoriesDates" style="width: 100%; height:500px;" :options="currencyOptions"/>
       </div>
     </div>
   </div>

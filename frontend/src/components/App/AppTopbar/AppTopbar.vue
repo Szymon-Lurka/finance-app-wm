@@ -4,8 +4,10 @@ import {useRouter} from "vue-router";
 import {useUiStore} from "@/stores/uiStore";
 import {useAuthStore} from "@/stores/authStore";
 import {useUserStore} from "@/stores/userStore";
+import {formatAmount} from "@/helpers/formatAmount";
 
 export default defineComponent({
+  methods: {formatAmount},
   setup() {
     const router = useRouter();
     const uiStore = useUiStore();
@@ -73,7 +75,8 @@ export default defineComponent({
       topbarMenuClasses,
       onLogout,
       balance,
-      onUserClick
+      onUserClick,
+      formatAmount
     }
   }
 })
@@ -95,7 +98,7 @@ export default defineComponent({
 
     <div class="layout-topbar-menu" :class="topbarMenuClasses">
       <badge v-if="balance" size="large" :severity="balance > 0 ? 'success' : 'danger'">
-        {{ balance }} zł
+        {{ formatAmount(balance) }} zł
       </badge>
       <badge v-else size="large">
         0 zł
