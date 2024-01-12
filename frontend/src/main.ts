@@ -23,6 +23,8 @@ import Textarea from "primevue/textarea";
 import Toolbar from "primevue/toolbar";
 import Paginator from "primevue/paginator";
 import ColorPicker from "primevue/colorpicker";
+import InputNumber from "primevue/inputnumber";
+import Calendar from "primevue/calendar";
 
 const app = createApp(App);
 
@@ -41,6 +43,9 @@ app.component('Textarea', Textarea);
 app.component('Toolbar', Toolbar);
 app.component('Paginator', Paginator);
 app.component('ColorPicker', ColorPicker);
+app.component('InputNumber', InputNumber);
+app.component('Calendar', Calendar);
+app.component('RadioButton', RadioButton);
 
 app.directive('ripple', Ripple)
 app.directive('styleclass', StyleClass);

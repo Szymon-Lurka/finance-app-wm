@@ -13,6 +13,7 @@ interface ICategory {
 
 interface GetCategoriesQuery extends SharedQuery {
     searchText?: string;
+    getAll?: string;
 }
 
 interface UpdateCategoryBody {

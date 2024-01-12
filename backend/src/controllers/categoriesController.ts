@@ -4,7 +4,6 @@ import type {AddCategoryBody, UpdateCategoryBody} from "../types/models/Category
 import {validateCategoryBody} from "../utils/validators/categoryValidators";
 import {BodyFieldsValidationError, createMongoDBError, NotFoundError} from "../utils/errors/AppError";
 import Category from "../models/Category";
-import {ApiFeatures} from "../utils/api/apiFeatures";
 import {getFacets, getMatchFilters} from "../utils/api/aggregateFeatures";
 import mongoose from "mongoose";
 import {GetCategoriesQuery} from "../types/models/Category";
@@ -75,7 +74,8 @@ const getCategories = async (req: CustomRequest<{}, {}, GetCategoriesQuery>, res
         pageSize = '10',
         sortOrder = '-1',
         searchText = '',
-        sortParameter
+        sortParameter,
+        getAll
     } = req.query;
 
     const filters = getMatchFilters({searchText}, {
@@ -92,6 +92,7 @@ const getCategories = async (req: CustomRequest<{}, {}, GetCategoriesQuery>, res
             color: 1
         },
         sortParameter,
+        getAll: getAll === 'y'
     })
 
     const matchFilters = {

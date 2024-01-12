@@ -3,6 +3,13 @@ import type {GetCategoriesDTO} from "@/types/models/Categories";
 import type {SortOrder} from "@/types/models/Sorting";
 
 const categoriesService = {
+    getAllCategories() {
+        return axiosInstance.get<GetCategoriesDTO>('/api/v1/categories', {
+            params: {
+                getAll: 'y'
+            }
+        })
+    },
     getCategories(
         pageSize = 10,
         page = 1,

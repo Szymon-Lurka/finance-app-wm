@@ -75,7 +75,14 @@ const updateFinancialEntry = async (req: CustomRequest<{
         message: 'Successfully updated financial entry'
     })
 };
-const deleteFinancialEntry = async (req: CustomRequest<unknown>, res: Response, next: NextFunction) => {
+const deleteFinancialEntry = async (req: CustomRequest<{ id: string }>, res: Response, next: NextFunction) => {
+    const entryID = req.params.id;
+    const entry = await FinancialEntry.findOneAndDelete({_id: entryID});
+    res.status(200).json({
+        status: 'success',
+        message: 'Successfully deleted entry',
+        deletedEntry: entry
+    })
 };
 const getFinancialEntry = async (req: CustomRequest<{ id: string; }>, res: Response, next: NextFunction) => {
     const financialEntryID = req.params.id;
@@ -142,6 +149,7 @@ const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntrie
             'categories.color': 1,
         },
         sortParameter,
+        getAll: false
     })
 
 

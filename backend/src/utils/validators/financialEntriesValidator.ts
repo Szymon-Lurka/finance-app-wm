@@ -7,13 +7,6 @@ const financialEntriesValidator = (body: AddFinancialEntryBody) => {
     if (isEmpty(body.name)) {
         invalidFields.push('name')
     }
-    if ((body.type === INCOME && body.amount < 0) || (body.type === EXPENSE && body.amount > 0)) {
-        invalidFields.push('type');
-        invalidFields.push('amount');
-    }
-    if (body.type != INCOME && body.type != EXPENSE) {
-        invalidFields.push('type');
-    }
     return invalidFields;
 }
 
