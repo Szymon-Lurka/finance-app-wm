@@ -13,6 +13,10 @@ interface UpdatePassword {
     currentPassword: string;
     repeatPassword: string;
 }
+interface ResetPassword{
+    newPassword: string;
+    repeatPassword: string;
+}
 
 interface UpdateUserData {
     username?: string;
@@ -21,6 +25,7 @@ interface UpdateUserData {
 }
 
 type UpdateUserPayload = UpdatePassword | UpdateUserData;
+type ResetUSerPayload = ResetPassword | UpdateUserData
 
 interface LoginPayload {
     email: string;
@@ -30,5 +35,6 @@ interface LoginPayload {
 export type {
     User,
     LoginPayload,
-    UpdateUserPayload
+    UpdateUserPayload,
+    ResetUSerPayload
 }

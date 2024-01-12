@@ -33,11 +33,13 @@ const lang = {
     auth: {
         titles: {
             register: 'Tworzenie konta',
-            login: 'Logowanie'
+            login: 'Logowanie',
+            forgotPassword:'Restowanie hasła'
         },
         error: {
             details: {
                 exists: 'Taki użytkownik już istnieje!',
+                notFound: 'Nie znaleziono adresu email',
                 register: 'Nie udało się stworzyć konta',
                 login: 'Nie udało się zalogować'
             }
