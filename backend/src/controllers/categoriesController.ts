@@ -15,6 +15,8 @@ const addCategory = async (req: CustomRequest<{}, AddCategoryBody>, res: Respons
     if (invalidFields.length > 0) {
         return next(new BodyFieldsValidationError('Add category wrong data', invalidFields))
     }
+    const existingCategory = Category.findOne({name, userId: req.user.id})
+    console.log(existingCategory);
     let category
     try {
         category = new Category({description, name, color, userId: req.user.id});

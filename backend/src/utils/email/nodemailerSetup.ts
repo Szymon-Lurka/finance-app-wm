@@ -29,7 +29,7 @@ const getResetPasswordTemplate = () => {
 <br>
 <p>Aby zresetować hasło, kliknij w przycisk poniżej: </p>
 <a href="{{ link }}">Kliknij tu by zresetować hasło</a>
-    <p>i wklej ten adres URL w Twoją przeglądarkę:</p>
+    <p>Lub wklej ten adres URL w Twoją przeglądarkę:</p>
     <p>{{link}}</p>
 
 </body>

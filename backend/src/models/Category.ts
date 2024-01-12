@@ -4,7 +4,7 @@ import {getNow} from "../utils/date/DateUtils";
 import FinancialEntry from "./FinancialEntry";
 
 const categorySchema = new Schema<ICategory>({
-    name: {type: String, unique: true, required: true},
+    name: {type: String, required: true},
     description: {type: String},
     color: {type: String},
     userId: {type: Schema.Types.ObjectId, ref: 'User', required: true},
