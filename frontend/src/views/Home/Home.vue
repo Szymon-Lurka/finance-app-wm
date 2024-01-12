@@ -1,13 +1,12 @@
 <script lang="ts">
 import {defineComponent} from "vue";
+import TypeRaports from "@/components/Raports/TypeRaports/TypeRaports.vue";
 
-export default defineComponent({})
+export default defineComponent({
+  components: {TypeRaports}
+})
 </script>
 
 <template>
-  Homepage
-  <button class="p-link">XD</button>
+  <TypeRaports/>
 </template>
-
-<style scoped lang="scss">
-</style>

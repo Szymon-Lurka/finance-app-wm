@@ -18,32 +18,6 @@ const financialEntrySchema = new Schema<IFinancialEntries>({
     createdAt: {type: String},
     updatedAt: {type: String}
 })
-const updateUserBalance = async (userID: string, type: FinancialEntryType, amount: number, next: NextFunction, isDeleting = false, double = false) => {
-    try {
-        const user = await User.findById(userID);
-        if (!user) {
-            return next(new NotFoundError('Change balance user', 'User not found'))
-        }
-        if (type === INCOME) {
-            if (isDeleting) {
-                user.balance -= Math.abs(amount);
-            } else {
-                user.balance += Math.abs(double ? amount * 2 : amount);
-            }
-        } else if (type === EXPENSE) {
-            if (isDeleting) {
-                user.balance += Math.abs(amount);
-            } else {
-                user.balance -= Math.abs(double ? amount * 2 : amount);
-            }
-        }
-        user.balance = Number(user.balance.toFixed(2));
-        await user.save();
-    } catch (e) {
-        next(new BaseError('Change balance user', HttpStatusCode.INTERNAL_SERVER, 'Error during changing balance of the user', true))
-    }
-}
-
 // @ts-ignore
 financialEntrySchema.pre('save', async function (next: NextFunction) {
     const now = getNow();
@@ -54,7 +28,6 @@ financialEntrySchema.pre('save', async function (next: NextFunction) {
     } else {
         this.amount = -Math.abs(this.amount)
     }
-    await updateUserBalance(this.userId as unknown as string, this.type, this.amount, next);
     next();
 })
 
@@ -70,38 +43,27 @@ financialEntrySchema.pre('findOneAndUpdate', async function (next: NextFunction)
         const financialEntry = await this.model.findById(id);
         if (financialEntry) {
             const type = update.type ? update.type : financialEntry.type;
-            if (update.amount) {
-                await updateUserBalance(financialEntry.userId, type, update.amount, next)
+            const isTypeUpdated = !!update.type && update.type !== financialEntry.type;
+            if (isTypeUpdated && update.amount) {
                 if (type === INCOME) {
-                    update.amount = Math.abs(update.amount)
+                    update.amount = Math.abs(update.amount);
                 } else {
-                    update.amount = -Math.abs(update.amount)
+                    update.amount = -Math.abs(update.amount);
                 }
+                update.type = type;
             }
-            if (update.type) {
+            if (isTypeUpdated && !update.amount) {
                 if (type === INCOME) {
-                    update.amount = Math.abs(financialEntry.amount)
+                    update.amount = Math.abs(financialEntry.amount);
                 } else {
-                    update.amount = -Math.abs(financialEntry.amount)
+                    update.amount = -Math.abs(financialEntry.amount);
                 }
-                await updateUserBalance(financialEntry.userId, type, financialEntry.amount, next, false, true)
+                update.type = type;
             }
         }
     }
     next();
 })
-
-// @ts-ignore
-financialEntrySchema.pre('findOneAndDelete', async function (next: NextFunction) {
-    const entryID = this.getQuery()._id;
-    const entryToDelete = await this.model.findById(entryID);
-    if (entryToDelete) {
-        await updateUserBalance(entryToDelete.userId, entryToDelete.type, entryToDelete.amount, next, true);
-    } else {
-        next();
-    }
-})
-
 
 const FinancialEntry = model<IFinancialEntries>('FinancialEntry', financialEntrySchema);
 

@@ -7,11 +7,37 @@ import {PASSWORD_VALIDATION_REGEX} from "../constants/regexes";
 import errors from "../constants/errors";
 import bcrypt from "bcryptjs";
 import {getNow} from "../utils/date/DateUtils";
+import mongoose from "mongoose";
+import FinancialEntry from "../models/FinancialEntry";
 
 
-const getTotalBalance = async(req: CustomRequest, res: Response, next: NextFunction) => {
+const getTotalBalance = async (req: CustomRequest, res: Response, next: NextFunction) => {
     const userID = req.user.id;
-   // TODO if necessary
+    const aggregationPipeline = [
+        {
+            $match: {
+                userId: new mongoose.Types.ObjectId(userID)
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                balance: {$sum: '$amount'}
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                balance: 1
+            }
+        }
+    ];
+    const result = await FinancialEntry.aggregate(aggregationPipeline);
+    const balance = result[0] ? result[0].balance : 0;
+    res.status(200).json({
+        status: 'success',
+        balance
+    })
 };
 const updateUser = async (req: CustomRequest<{}, ManageUserBody>, res: Response, next: NextFunction) => {
     const {firstName, lastName, newPassword, repeatPassword, username, currentPassword} = req.body;

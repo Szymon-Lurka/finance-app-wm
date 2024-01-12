@@ -11,6 +11,7 @@ import {useToastsService} from "@/composables/toasts";
 import {useUserStore} from "@/stores/userStore";
 import type {Category} from "@/types/models/Categories";
 import FormsEntry from "@/components/Forms/FormsEntry/FormsEntry.vue";
+import dayjs from "dayjs";
 
 export default defineComponent({
   components: {FormsEntry, FormsCategory},
@@ -105,7 +106,8 @@ export default defineComponent({
       deleteEntry,
       refuseToDelete,
       onDeleteEntry,
-      searchEntries
+      searchEntries,
+      dayjs
     }
   }
 })
@@ -137,7 +139,11 @@ export default defineComponent({
               </badge>
             </template>
           </Column>
-          <Column sortable field="date" header="Data"/>
+          <Column sortable field="date" header="Data">
+            <template #body="{data}">
+              {{ dayjs(data.date).format('MM/DD/YYYY') }}
+            </template>
+          </Column>
 
           <Column field="name" header="Nazwa" sortable style="width: 25%"/>
           <Column field="description" header="Opis" sortable style="width:25%; max-width:25%"/>
