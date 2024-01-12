@@ -14,7 +14,7 @@ const financialEntrySchema = new Schema<IFinancialEntries>({
     categoryId: {type: Schema.Types.ObjectId, ref: 'Category'},
     amount: {type: Number, required: true},
     date: {type: String},
-    type: {type: String, enum: [EXPENSE, INCOME], required: true},
+    type: {type: String, enum: [EXPENSE, INCOME], required: true, default: EXPENSE},
     createdAt: {type: String},
     updatedAt: {type: String}
 })

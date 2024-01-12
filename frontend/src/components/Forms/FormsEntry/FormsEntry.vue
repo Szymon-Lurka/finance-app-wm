@@ -37,7 +37,7 @@ export default defineComponent({
       resetForm
     } = useForm({
       validationSchema: object({
-        name: string().required(lang.validation.nameRequired('Nazwa')).min(3, lang.validation.min(3, 'Nazwa')),
+        name: string().required(lang.validation.nameRequired('Nazwa')).min(3, lang.validation.min(3, 'Nazwa')).max(30, lang.validation.max(30, 'Nazwa')),
         description: string().max(125, lang.validation.max(125, 'Opis')),
         type: string().oneOf(['expense', 'income'], 'xD'),
         amount: number(),
@@ -64,8 +64,6 @@ export default defineComponent({
     const isFormDirty = useIsFormDirty(fields);
     const isCategorySelectDirty = ref(false);
     watch(categoryIdRef, (x) => {
-      console.log(x);
-      console.log('XD?');
       isCategorySelectDirty.value = true;
     });
 
