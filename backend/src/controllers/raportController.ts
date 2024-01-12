@@ -62,10 +62,24 @@ const getBalance = async (req: CustomRequest<{}, {}, RaportsBalanceQuery>, res: 
                         }
                     }
                 ],
-                diffEntries: [
+                categoriesAmounts: [
                     {
                         $group: {
-                            _id: '$type',
+                            _id: {
+                                category: '$categories.name',
+                                color: '$categories.color'
+                            },
+                            totalAmount: {$sum: '$amount'}
+                        }
+                    }
+                ],
+                categoriesExpenseIncome: [
+                    {
+                        $group: {
+                            _id: {
+                                type: '$type',
+                                category: '$categories.name'
+                            },
                             totalAmount: {$sum: '$amount'}
                         }
                     }
@@ -82,39 +96,49 @@ const getBalance = async (req: CustomRequest<{}, {}, RaportsBalanceQuery>, res: 
                         }
                     }
                 ],
-                categoriesAmounts: [
+                categoriesTotalIncomeExpense: [
                     {
                         $group: {
-                            _id: {
-                                category: '$categories.name',
-                                color: '$categories.color'
+                            _id: '$categories.name',
+                            totalIncome: {
+                                $sum: {
+                                    $cond: {if: {$eq: ['$type', 'income']}, then: '$amount', else: 0}
+                                }
                             },
+                            totalExpense: {
+                                $sum: {
+                                    $cond: {if: {$eq: ['$type', 'expense']}, then: '$amount', else: 0}
+                                }
+                            }
+                        }
+                    }
+                ],
+                diffEntries: [
+                    {
+                        $group: {
+                            _id: '$type',
                             totalAmount: {$sum: '$amount'}
                         }
                     }
-                ]
+                ],
             }
         }
     ];
 
     const [result] = await FinancialEntry.aggregate(aggregationPipeline);
-    const {results, sumAmount, diffEntries, categoriesDates, categoriesAmounts} = result;
-    const categoriesAmountByDates = categoriesDates.map((data: any) => ({
-        date: data._id.date,
-        categoryName: data._id.category,
-        totalAmount: data.totalAmount,
-        color: data._id.color
-    }));
-    console.log(categoriesAmounts);
+    const {results, sumAmount, categoriesAmounts, categoriesExpenseIncome, categoriesDates, categoriesTotalIncomeExpense, diffEntries} = result;
     const totalAmount = sumAmount.length > 0 ? sumAmount[0].totalAmount : 0;
     const entries = results;
 
     res.status(200).json({
         status: 'success',
+        diffEntries,
         entries,
         totalAmount: totalAmount.toFixed(2),
-        diffEntries,
-        categoriesAmountByDates
+        categoriesAmounts,
+        categoriesExpenseIncome,
+        categoriesTotalIncomeExpense,
+        categoriesDates
     })
 };
 
