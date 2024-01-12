@@ -140,7 +140,7 @@ export default defineComponent({
           <Column sortable field="date" header="Data"/>
 
           <Column field="name" header="Nazwa" sortable style="width: 25%"/>
-          <Column field="description" header="Opis" sortable/>
+          <Column field="description" header="Opis" sortable style="width:25%; max-width:25%"/>
           <Column header="Kwota" sortable>
             <template #body="{data}">
               <badge :severity="data.amount > 0 ? 'success' : 'danger'">
@@ -148,7 +148,7 @@ export default defineComponent({
               </badge>
             </template>
           </Column>
-          <Column header="Kategoria" sortable>
+          <Column header="Kategoria" sortable style="width:20%">
             <template #body="{data}">
               <badge v-if="data.categories" :style="{'background-color': data.categories.color}">
                 {{ data.categories.name }}

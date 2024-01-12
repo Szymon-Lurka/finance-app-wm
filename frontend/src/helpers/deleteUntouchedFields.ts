@@ -1,4 +1,4 @@
-const whitelist = ['type'];
+const whitelist = [];
 
 const deleteUntouchedFields = (data, fields) => {
     fields.forEach((field) => {

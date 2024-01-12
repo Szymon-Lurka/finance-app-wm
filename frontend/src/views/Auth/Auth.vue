@@ -38,7 +38,7 @@ div.background {
   align-items: center;
   :deep(.card) {
     width: 40%;
-    height: 35%;
+    height: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -49,14 +49,14 @@ div.background {
     }
   }
   :deep(.card-high) {
-    height: 53%;
+    height: 75%;
     width: 45%;
     @media(max-width:768px) {
       width: 90%;
     }
   }
   :deep(.card-high-errors) {
-    height: 60%;
+    height: 85%;
   }
 }
 </style>
