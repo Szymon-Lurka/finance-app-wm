@@ -14,7 +14,26 @@ const nodemailerSetup = () => {
 };
 
 const getResetPasswordTemplate = () => {
-    return fs.readFileSync(path.join(__dirname, 'views', 'reset-password.handlebars'), 'utf-8');
+    return `
+    <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+
+<h1>Cześć {{ name }},</h1>
+<br>
+<p>Nie pamiętasz hasła?</p>
+<p>Otrzymaliśmy prośbę o zresetowanie hasła dla Twojego konta.</p>
+<br>
+<p>Aby zresetować hasło, kliknij w przycisk poniżej: </p>
+<a href="{{ link }}">Kliknij tu by zresetować hasło</a>
+    <p>i wklej ten adres URL w Twoją przeglądarkę:</p>
+    <p>{{link}}</p>
+
+</body>
+    `;
 }
 
 export {
