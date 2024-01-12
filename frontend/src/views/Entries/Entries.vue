@@ -88,6 +88,7 @@ export default defineComponent({
     })
 
     const onSort = (sortEvent) => {
+      console.log(sortEvent);
       sortDetails.value.order = sortEvent.sortOrder;
       sortDetails.value.parameter = sortEvent.sortField;
       fetchFinancialEntries(false, false);
@@ -193,7 +194,7 @@ export default defineComponent({
             </div>
           </template>
           <template #empty>Brak wpisów</template>
-          <Column header="Typ">
+          <Column header="Typ" sortable field="type">
             <template #body="{data}">
               <badge :severity="data.type === 'expense' ? 'danger' : 'success'">
                 {{ data.type === 'expense' ? 'Wydatek' : 'Przychód' }}
@@ -208,14 +209,14 @@ export default defineComponent({
 
           <Column field="name" header="Nazwa" sortable style="width: 25%"/>
           <Column field="description" header="Opis" sortable style="width:25%; max-width:25%"/>
-          <Column header="Kwota" sortable style="width:15%">
+          <Column header="Kwota" field="amount" sortable style="width:15%">
             <template #body="{data}">
               <badge :severity="data.amount > 0 ? 'success' : 'danger'">
                 {{ formatAmount(data.amount) }} zł
               </badge>
             </template>
           </Column>
-          <Column header="Kategoria" sortable style="width:20%">
+          <Column header="Kategoria" field="categoryId" sortable style="width:20%">
             <template #body="{data}">
               <badge v-if="data.categories" :style="{'background-color': data.categories.color}">
                 {{ data.categories.name }}
