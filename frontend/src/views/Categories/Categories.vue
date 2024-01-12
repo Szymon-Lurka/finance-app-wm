@@ -35,6 +35,9 @@ export default defineComponent({
             searchText.value
         );
         categories.value = data.results;
+        paginationDetails.value.page = data.currentPage;
+        paginationDetails.value.totalCount = data.totalCount;
+        paginationDetails.value.totalPages = data.totalPages;
       } catch (e) {
         console.log(e);
       }
