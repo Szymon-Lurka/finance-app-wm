@@ -17,7 +17,7 @@ export default defineComponent({
     const categoriesIncomes = ref({});
     const categoriesCombined = ref({});
 
-    const odpalaj = (entries, dataSet) => {
+    const createDataForChart = (entries, dataSet) => {
       entries.value.forEach((entry) => {
         if (!entry.categories) {
           if (!dataSet.value['none']) {
@@ -122,9 +122,9 @@ export default defineComponent({
     };
     onMounted(async () => {
       await fetchBalance();
-      odpalaj(balanceEntries, categoriesCombined);
-      odpalaj(balanceExpensesEntries, categoriesExpenses);
-      odpalaj(balanceIncomesEntries, categoriesIncomes);
+      createDataForChart(balanceEntries, categoriesCombined);
+      createDataForChart(balanceExpensesEntries, categoriesExpenses);
+      createDataForChart(balanceIncomesEntries, categoriesIncomes);
     })
     return {
       diffChartData,
