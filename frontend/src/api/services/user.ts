@@ -1,5 +1,5 @@
 import {axiosInstance} from "@/api";
-import type {UpdateUserPayload} from "@/types/models/Auth";
+import type {UpdateUserPayload, ResetUSerPayload} from "@/types/models/Auth";
 
 const userService = {
     getMe: () => {
@@ -10,6 +10,9 @@ const userService = {
     },
     updateUser: (payload: UpdateUserPayload) => {
         return axiosInstance.patch('/api/v1/user', payload);
+    },
+    resetUser: (payload: ResetUSerPayload) => {
+        return axiosInstance.patch('/api/v1/auth/reset-password', payload);
     }
 }
 
