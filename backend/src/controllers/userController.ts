@@ -33,7 +33,8 @@ const getTotalBalance = async (req: CustomRequest, res: Response, next: NextFunc
         }
     ];
     const result = await FinancialEntry.aggregate(aggregationPipeline);
-    const balance = result[0] ? result[0].balance : 0;
+    let balance = result[0] ? result[0].balance : 0;
+    balance = balance.toFixed(2);
     res.status(200).json({
         status: 'success',
         balance

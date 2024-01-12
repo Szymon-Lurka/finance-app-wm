@@ -8,24 +8,28 @@ import debounce from 'lodash.debounce';
 import FormsCategory from "@/components/Forms/FormsCategory/FormsCategory.vue";
 import {useToastsService} from "@/composables/toasts";
 import {lang} from "@/constants/lang";
+import {Pagination} from "@/types/models/Pagination";
+import {defaultPagination} from "@/helpers/PaginationHelpers";
+import AppPagination from "@/components/App/AppPagination/AppPagination.vue";
 
 export default defineComponent({
-  components: {FormsCategory},
+  components: {AppPagination, FormsCategory},
   setup() {
     const {dispatchSuccessToast, dispatchErrorToast} = useToastsService();
 
-    const sortDetails = ref<DefaultSortDetails>(defaultSortDetails);
+    const sortDetails = ref<DefaultSortDetails>({...defaultSortDetails});
+    const paginationDetails = ref<Pagination>({...defaultPagination});
     const searchText = ref('');
     const categories = ref<Category[]>();
     const categoriesTable = ref(null);
     const manageCategoryDialog = ref(false);
     const deleteCategoryDialog = ref(false);
     const selectedID = ref(null);
-    const fetchCategories = async (pageSize = 10, page = 1) => {
+    const fetchCategories = async () => {
       try {
         const {data} = await categoriesService.getCategories(
-            pageSize,
-            page,
+            paginationDetails.value.pageSize,
+            paginationDetails.value.page,
             sortDetails.value.parameter,
             sortDetails.value.order,
             searchText.value
@@ -46,6 +50,16 @@ export default defineComponent({
     const onSort = (sortEvent) => {
       sortDetails.value.order = sortEvent.sortOrder;
       sortDetails.value.parameter = sortEvent.sortField;
+      fetchCategories();
+    }
+
+    const onPageChange = (page: number) => {
+      paginationDetails.value.page = page;
+      fetchCategories();
+    }
+
+    const onItemsOnPageChange = (pageSize: number) => {
+      paginationDetails.value.pageSize = pageSize;
       fetchCategories();
     }
 
@@ -98,7 +112,10 @@ export default defineComponent({
       deleteCategoryDialog,
       deleteCategory,
       refuseToDelete,
-      onDeleteCategory
+      onDeleteCategory,
+      paginationDetails,
+      onPageChange,
+      onItemsOnPageChange
     }
   }
 })
@@ -137,9 +154,18 @@ export default defineComponent({
               </div>
             </template>
           </Column>
+          <template #footer>
+            <AppPagination :total-items="paginationDetails.totalCount"
+                           :items-per-page="paginationDetails.pageSize"
+                           :items-per-page-options="[5,10,15]"
+                           :current-page="paginationDetails.page"
+                           @page-change="onPageChange"
+                           @items-per-page-change="onItemsOnPageChange"/>
+          </template>
         </DataTable>
       </div>
-      <Dialog close-on-escape v-model:visible="manageCategoryDialog" :header="`${!!selectedID ? 'Edycja' : 'Dodawanie'} kategorii`"
+      <Dialog close-on-escape v-model:visible="manageCategoryDialog"
+              :header="`${!!selectedID ? 'Edycja' : 'Dodawanie'} kategorii`"
               :modal="true" style="width:450px;">
         <FormsCategory @changed="refresh" :id="selectedID"/>
       </Dialog>

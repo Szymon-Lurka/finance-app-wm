@@ -1,5 +1,6 @@
 import type {SortOrder} from "@/types/models/Sorting";
 import {axiosInstance} from "@/api";
+import type {FinancialEntryType} from "@/types/types/FinancialEntry";
 
 const financialEntriesService = {
     getFinancialEntries(
@@ -7,7 +8,8 @@ const financialEntriesService = {
         page = 1,
         sortParameter = 'createdAt',
         sortOrder: SortOrder,
-        searchText = ''
+        searchText = '',
+        type: FinancialEntryType | ''
     ) {
         return axiosInstance.get(`/api/v1/financial-entries`, {
             params: {
@@ -15,7 +17,8 @@ const financialEntriesService = {
                 page,
                 sortOrder,
                 searchText,
-                sortParameter
+                sortParameter,
+                type
             }
         })
     },

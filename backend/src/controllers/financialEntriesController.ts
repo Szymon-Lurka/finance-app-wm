@@ -120,9 +120,11 @@ const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntrie
         page = '1',
         pageSize = '10',
         sortOrder = '-1',
-        sortParameter
+        sortParameter,
+        type= 'expense'
     } = req.query;
 
+    console.log(req.query);
     const filters = getMatchFilters({
         ...req.query
     }, {
@@ -203,7 +205,7 @@ const getFinancialEntries = async (req: CustomRequest<{}, {}, GetFinancialEntrie
         totalPages,
         totalCount: total,
         currentPage: Number(page),
-        totalAmount
+        totalAmount: totalAmount.toFixed(2)
     })
 };
 

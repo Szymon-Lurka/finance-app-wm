@@ -26,6 +26,8 @@ import ColorPicker from "primevue/colorpicker";
 import InputNumber from "primevue/inputnumber";
 import Calendar from "primevue/calendar";
 import Chart from 'primevue/chart';
+import TriStateCheckbox from "primevue/tristatecheckbox";
+import SelectButton from "primevue/selectbutton";
 
 const app = createApp(App);
 
@@ -48,6 +50,8 @@ app.component('InputNumber', InputNumber);
 app.component('Calendar', Calendar);
 app.component('RadioButton', RadioButton);
 app.component('Chart', Chart);
+app.component('TriStateCheckbox', TriStateCheckbox);
+app.component('SelectButton', SelectButton);
 
 app.directive('ripple', Ripple)
 app.directive('styleclass', StyleClass);

@@ -22,6 +22,8 @@ const getMatchFilters = (query: AggregateFeaturesQuery, fieldMap: AggregateFeatu
         filters[field][operator] = value;
     };
 
+    console.log(query);
+
     Object.entries(query).forEach(([key, value]) => {
         const filterField = fieldMap[key];
 
@@ -40,6 +42,7 @@ const getMatchFilters = (query: AggregateFeaturesQuery, fieldMap: AggregateFeatu
                         setFilterValue(field, `$${key === 'amountFrom' ? 'gte' : 'lte'}`, parseFloat(value));
                     });
                 } else if (key === 'type') {
+                    console.log('XD');
                     filterField.forEach((field) => {
                         setFilterValue(field, '$eq', value);
                     });

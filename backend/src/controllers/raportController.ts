@@ -62,6 +62,57 @@ const getBalance = async (req: CustomRequest<{}, {}, RaportsBalanceQuery>, res: 
                         }
                     }
                 ],
+                categoriesAmounts: [
+                    {
+                        $group: {
+                            _id: {
+                                category: '$categories.name',
+                                color: '$categories.color'
+                            },
+                            totalAmount: {$sum: '$amount'}
+                        }
+                    }
+                ],
+                categoriesExpenseIncome: [
+                    {
+                        $group: {
+                            _id: {
+                                type: '$type',
+                                category: '$categories.name'
+                            },
+                            totalAmount: {$sum: '$amount'}
+                        }
+                    }
+                ],
+                categoriesDates: [
+                    {
+                        $group: {
+                            _id: {
+                                date: '$date',
+                                category: '$categories.name',
+                                color: '$categories.color'
+                            },
+                            totalAmount: {$sum: "$amount"}
+                        }
+                    }
+                ],
+                categoriesTotalIncomeExpense: [
+                    {
+                        $group: {
+                            _id: '$categories.name',
+                            totalIncome: {
+                                $sum: {
+                                    $cond: {if: {$eq: ['$type', 'income']}, then: '$amount', else: 0}
+                                }
+                            },
+                            totalExpense: {
+                                $sum: {
+                                    $cond: {if: {$eq: ['$type', 'expense']}, then: '$amount', else: 0}
+                                }
+                            }
+                        }
+                    }
+                ],
                 diffEntries: [
                     {
                         $group: {
@@ -69,22 +120,25 @@ const getBalance = async (req: CustomRequest<{}, {}, RaportsBalanceQuery>, res: 
                             totalAmount: {$sum: '$amount'}
                         }
                     }
-                ]
+                ],
             }
         }
     ];
 
     const [result] = await FinancialEntry.aggregate(aggregationPipeline);
-    console.log(result.diffEntries);
-    const {results, sumAmount, diffEntries} = result;
+    const {results, sumAmount, categoriesAmounts, categoriesExpenseIncome, categoriesDates, categoriesTotalIncomeExpense, diffEntries} = result;
     const totalAmount = sumAmount.length > 0 ? sumAmount[0].totalAmount : 0;
     const entries = results;
 
     res.status(200).json({
         status: 'success',
+        diffEntries,
         entries,
-        totalAmount,
-        diffEntries
+        totalAmount: totalAmount.toFixed(2),
+        categoriesAmounts,
+        categoriesExpenseIncome,
+        categoriesTotalIncomeExpense,
+        categoriesDates
     })
 };
 
