@@ -17,6 +17,8 @@ export default defineComponent({
     const categoriesIncomes = ref({});
     const categoriesCombined = ref({});
 
+    const categoriesAmountByDates = ref([]);
+
     const createDataForChart = (entries, dataSet) => {
       entries.value.forEach((entry) => {
         if (!entry.categories) {
@@ -83,6 +85,42 @@ export default defineComponent({
       ]
     }));
 
+    const stackedBarConfig = {
+      labels: ['2023-02-02', '2023-02-03', '2023-02-02', '2023-02-03', '2023-02-02', '2023-02-03'],
+      datasets: [
+        {
+          label: 'KAtegoria 1',
+          data: [145, 42, 42, 5, 63, 1, 3],
+          backgroundColor: 'red',
+          stack: 'Stack 0'
+        },
+        {
+          label: 'KAtegoria 2',
+          data: [-242, -502, 4, 564, 523, 1],
+          backgroundColor: 'yellow',
+          stack: 'Stack 1'
+        },
+        {
+          label: 'KAtegoria 3',
+          data: [600, -212, 45, 23, -523, 2],
+          backgroundColor: 'green',
+          stack: 'Stack 2'
+        },
+        {
+          label: 'KAtegoria 3',
+          data: [110, -25, 45, 23, -523, 2],
+          backgroundColor: 'gray',
+          stack: 'Stack 3'
+        },
+        {
+          label: 'KAtegoria 3',
+          data: [50, -245, 45, 23, -523, 2],
+          backgroundColor: 'blue',
+          stack: 'Stack 4'
+        },
+      ],
+    };
+
     const getExpensesFromDiff = (diffEntries: any[], type: FinancialEntryType): number => {
       if (!diffEntries || (diffEntries.length && diffEntries.length < 1)) return 0;
       const entry = diffEntries.find((entry) => entry._id === type);
@@ -125,6 +163,8 @@ export default defineComponent({
       createDataForChart(balanceEntries, categoriesCombined);
       createDataForChart(balanceExpensesEntries, categoriesExpenses);
       createDataForChart(balanceIncomesEntries, categoriesIncomes);
+      console.log(balanceEntries.value);
+      console.log(categoriesCombined.value);
     })
     return {
       diffChartData,
@@ -135,6 +175,7 @@ export default defineComponent({
       balanceTotalAmount,
       balanceExpensesAmount,
       balanceIncomesAmount,
+      stackedBarConfig
     }
   }
 })
@@ -199,31 +240,40 @@ export default defineComponent({
       </div>
     </div>
 
-    <div class="col-12 xl:col-6">
+    <div class="col-12 lg:col-6 xl:col-4">
       <div class="card card-chart">
         <h2>
           Dochody
         </h2>
         <Chart type="pie" :data="diffChartData" :plugins="setChartOptions"/>
       </div>
+    </div>
+    <div class="col-12 lg:col-6 xl:col-4">
       <div class="card card-chart">
         <h2>
-          Dochody z podziałem na kategorie
+          Dochody w kategoriach
         </h2>
         <Chart type="doughnut" :data="categoriesChartData" :plugins="setChartOptions"/>
       </div>
-
     </div>
-    <div class="col-12 xl:col-6">
+    <div class="col-12 lg:col-6 xl:col-4">
       <div class="card card-chart">
         <h2>
-          Wydatki z podziałem na kategorie
+          Dochody w kategoriach
         </h2>
-        <Chart type="pie" :data="categoriesExpensesChartData" :plugins="setChartOptions"/>
+        <Chart type="doughnut" :data="categoriesChartData" :plugins="setChartOptions"/>
+      </div>
+    </div>
+    <div class="col-12 xl:col-12">
+      <div class="card card-chart">
+        <h2>
+          Wydatki w kategoriach
+        </h2>
+        <Chart type="bar" style="width:100%" :data="stackedBarConfig" :plugins="setChartOptions"/>
       </div>
       <div class="card card-chart">
         <h2>
-          Przychody z podziałem na kategorie
+          Przychody w kategoriach
         </h2>
         <Chart type="pie" :data="categoriesIncomesChartData" :plugins="setChartOptions"/>
       </div>

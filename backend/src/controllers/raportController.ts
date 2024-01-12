@@ -69,22 +69,52 @@ const getBalance = async (req: CustomRequest<{}, {}, RaportsBalanceQuery>, res: 
                             totalAmount: {$sum: '$amount'}
                         }
                     }
+                ],
+                categoriesDates: [
+                    {
+                        $group: {
+                            _id: {
+                                date: '$date',
+                                category: '$categories.name',
+                                color: '$categories.color'
+                            },
+                            totalAmount: {$sum: "$amount"}
+                        }
+                    }
+                ],
+                categoriesAmounts: [
+                    {
+                        $group: {
+                            _id: {
+                                category: '$categories.name',
+                                color: '$categories.color'
+                            },
+                            totalAmount: {$sum: '$amount'}
+                        }
+                    }
                 ]
             }
         }
     ];
 
     const [result] = await FinancialEntry.aggregate(aggregationPipeline);
-    console.log(result.diffEntries);
-    const {results, sumAmount, diffEntries} = result;
+    const {results, sumAmount, diffEntries, categoriesDates, categoriesAmounts} = result;
+    const categoriesAmountByDates = categoriesDates.map((data: any) => ({
+        date: data._id.date,
+        categoryName: data._id.category,
+        totalAmount: data.totalAmount,
+        color: data._id.color
+    }));
+    console.log(categoriesAmounts);
     const totalAmount = sumAmount.length > 0 ? sumAmount[0].totalAmount : 0;
     const entries = results;
 
     res.status(200).json({
         status: 'success',
         entries,
-        totalAmount,
-        diffEntries
+        totalAmount: totalAmount.toFixed(2),
+        diffEntries,
+        categoriesAmountByDates
     })
 };
 

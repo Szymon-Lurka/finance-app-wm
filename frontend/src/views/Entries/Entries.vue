@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineComponent, onMounted, ref} from "vue";
+import {defineComponent, onMounted, ref, watch} from "vue";
 import {financialEntriesService} from "@/api/services/financialEntries";
 import {DefaultSortDetails} from "@/types/models/Sorting";
 import {defaultSortDetails} from "@/helpers/SortHelpers";
@@ -14,29 +14,63 @@ import dayjs from "dayjs";
 import AppPagination from "@/components/App/AppPagination/AppPagination.vue";
 import type {Pagination} from "@/types/models/Pagination";
 import {defaultPagination} from "@/helpers/PaginationHelpers";
+import type {FinancialEntryType} from "@/types/types/FinancialEntry";
 
 export default defineComponent({
   components: {AppPagination, FormsEntry, FormsCategory},
   setup() {
     const {dispatchSuccessToast, dispatchErrorToast} = useToastsService();
     const userStore = useUserStore();
-    const paginationDetails = ref<Pagination>(defaultPagination);
-    const sortDetails = ref<DefaultSortDetails>(defaultSortDetails);
+    const paginationDetails = ref<Pagination>({...defaultPagination});
+    const sortDetails = ref<DefaultSortDetails>({...defaultSortDetails});
     const searchText = ref('');
     const financialEntries = ref<Entry[]>([]);
     const totalAmount = ref(0);
     const selectedID = ref(null);
     const manageEntryDialog = ref(false);
     const deleteEntryDialog = ref(false);
-    const fetchFinancialEntries = async (fetchBalance = true, pageSize = 1, page = 1) => {
+    const typeFilter = ref({
+      name: 'Wszystko',
+      value: ''
+    });
+    const typeFilterOptions = ref([
+      {
+        name: 'Przychody',
+        value: 'income'
+      },
+      {
+        name: 'Wydatki',
+        value: 'expense'
+      },
+      {
+        name: 'Wszystko',
+        value: ''
+      }
+    ]);
+
+    watch(typeFilter, (x) => {
+      if (!x) {
+        typeFilter.value = {
+          name: 'Wszystko',
+          value: ''
+        }
+      }
+      console.log(x);
+      fetchFinancialEntries(false)
+    })
+    const fetchFinancialEntries = async (fetchBalance = true, resetSort = true) => {
+      if (resetSort) {
+        sortDetails.value = {...defaultSortDetails};
+      }
       try {
         await userStore.fetchBalance();
         const {data} = await financialEntriesService.getFinancialEntries(
-            pageSize,
-            page,
+            paginationDetails.value.pageSize,
+            paginationDetails.value.page,
             sortDetails.value.parameter,
             sortDetails.value.order,
-            searchText.value
+            searchText.value,
+            typeFilter.value.value
         );
         financialEntries.value = data.results;
         totalAmount.value = data.totalAmount;
@@ -54,7 +88,7 @@ export default defineComponent({
     const onSort = (sortEvent) => {
       sortDetails.value.order = sortEvent.sortOrder;
       sortDetails.value.parameter = sortEvent.sortField;
-      fetchFinancialEntries();
+      fetchFinancialEntries(false, false);
     }
 
     const editEntry = (id: string) => {
@@ -94,7 +128,13 @@ export default defineComponent({
 
     const onPageChange = (page: number) => {
       paginationDetails.value.page = page;
-      fetchFinancialEntries(true, paginationDetails.value.pageSize, paginationDetails.value.page);
+      fetchFinancialEntries(true);
+    }
+
+
+    const onItemsOnPageChange = (pageSize: number) => {
+      paginationDetails.value.pageSize = pageSize;
+      fetchFinancialEntries(true);
     }
     const openNew = () => {
       selectedID.value = null;
@@ -118,7 +158,10 @@ export default defineComponent({
       searchEntries,
       dayjs,
       paginationDetails,
-      onPageChange
+      onPageChange,
+      onItemsOnPageChange,
+      typeFilter,
+      typeFilterOptions
     }
   }
 })
@@ -130,7 +173,11 @@ export default defineComponent({
       <div class="card">
         <Toolbar class="mb-4">
           <template #start>
-            <Button label="Nowy wpis" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew"/>
+            <div class="flex">
+              <Button label="Nowy wpis" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew"/>
+              <SelectButton class="align-self-end" v-model="typeFilter" :options="typeFilterOptions"
+                            option-label="name"/>
+            </div>
           </template>
         </Toolbar>
         <DataTable :value="financialEntries" @sort="onSort">
@@ -184,9 +231,12 @@ export default defineComponent({
             </template>
           </Column>
           <template #footer>
-            <AppPagination :total-items="paginationDetails.totalCount" :items-per-page="paginationDetails.pageSize"
-                           :items-per-page-options="[1,2,5,10,15]"
-                           :current-page="paginationDetails.page" @page-change="onPageChange"/>
+            <AppPagination :total-items="paginationDetails.totalCount"
+                           :items-per-page="paginationDetails.pageSize"
+                           :items-per-page-options="[5,10,15]"
+                           :current-page="paginationDetails.page"
+                           @page-change="onPageChange"
+                           @items-per-page-change="onItemsOnPageChange"/>
           </template>
         </DataTable>
         <Dialog close-on-escape v-model:visible="manageEntryDialog"

@@ -1,18 +1,20 @@
 <template>
   <div class="pagination">
-    <button @click="changePage(-1)" :disabled="currentPage === 1">Poprzednia strona</button>
+    <Button icon="pi pi-chevron-left" outlined rounded class="mr-2" @click="changePage(-1)"
+            :disabled="currentPage === 1"/>
     <span>Strona {{ currentPage }} z {{ totalPages }}</span>
-    <button @click="changePage(1)" :disabled="currentPage === totalPages">Następna strona</button>
+    <Button icon="pi pi-chevron-right" outlined rounded class="mr-2" @click="changePage(1)"
+            :disabled="currentPage === totalPages"/>
 
-    <select v-model="selectedItemsPerPage" @change="changeItemsPerPage">
-      <option v-for="option in itemsPerPageOptions" :key="option" :value="option">
-        {{ option }} na stronie
-      </option>
-    </select>
+    <Dropdown v-model="selectedItemsPerPage" :options="itemsPerPageOptions" @change="changeItemsPerPage"
+    />
+
   </div>
 </template>
 
 <script>
+import {ref, computed, watch} from 'vue';
+
 export default {
   props: {
     currentPage: {
@@ -29,34 +31,35 @@ export default {
     },
     itemsPerPageOptions: {
       type: Array,
-      default: () => [10, 20, 50], // Domyślne opcje ilości elementów na stronie
+      default: () => [5, 10, 15],
     },
   },
-  data() {
-    return {
-      selectedItemsPerPage: this.itemsPerPage,
-    };
-  },
-  computed: {
-    totalPages() {
-      return Math.ceil(this.totalItems / this.selectedItemsPerPage);
-    },
-  },
-  watch: {
-    itemsPerPage(newVal) {
-      this.selectedItemsPerPage = newVal;
-    },
-  },
-  methods: {
-    changePage(offset) {
-      const newPage = this.currentPage + offset;
-      if (newPage >= 1 && newPage <= this.totalPages) {
-        this.$emit('page-change', newPage);
+  setup(props, {emit}) {
+    const selectedItemsPerPage = ref(props.itemsPerPage);
+
+    const totalPages = computed(() => Math.ceil(props.totalItems / selectedItemsPerPage.value));
+
+    watch(() => props.itemsPerPage, (newVal) => {
+      selectedItemsPerPage.value = newVal;
+    });
+
+    const changePage = (offset) => {
+      const newPage = props.currentPage + offset;
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        emit('page-change', newPage);
       }
-    },
-    changeItemsPerPage() {
-      this.$emit('items-per-page-change', this.selectedItemsPerPage);
-    },
+    };
+
+    const changeItemsPerPage = () => {
+      emit('items-per-page-change', selectedItemsPerPage.value);
+    };
+
+    return {
+      selectedItemsPerPage,
+      totalPages,
+      changePage,
+      changeItemsPerPage
+    };
   },
 };
 </script>
