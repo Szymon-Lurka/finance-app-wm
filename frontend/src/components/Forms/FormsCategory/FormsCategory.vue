@@ -60,7 +60,6 @@ export default defineComponent({
         })
         console.log(data);
       } catch (e) {
-        emit('edited');
         dispatchErrorToast({title: lang.categories.titles.edit, details: lang.categories.error.details.editFetch});
       }
     };

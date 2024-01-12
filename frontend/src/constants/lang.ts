@@ -65,6 +65,28 @@ const lang = {
                 updatePassword: 'Pomyślnie zaktualizowano hasło'
             }
         }
+    },
+    entries: {
+        titles: {
+            add: 'Dodawanie wpisu',
+            edit: 'Edycja wpisu',
+            deleting: 'Usuwanie wpisu'
+        },
+        error: {
+            details: {
+                add: 'Nie udało się dodać wpisu',
+                edit: 'Nie udało się edytować wpisu',
+                deleting: 'Nie udało się usunąć wpisu',
+                editFetch: 'Nie udało się pobrać wpisu'
+            }
+        },
+        success: {
+            details: {
+                add: 'Pomyślnie dodano nowy wpis',
+                edit: 'Pomyślnie edytowano wpis',
+                deleting: 'Pomyślnie usunięto wpis'
+            }
+        }
     }
 } as const;
 

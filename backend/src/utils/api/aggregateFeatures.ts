@@ -68,6 +68,7 @@ const getFacets = (config: FacetsConfig) => {
             {$count: 'count'}
         ]
     };
+    if (config.getAll) return facets;
     facets.paginatedResults.unshift({
         $limit: parseInt(config.pageSize)
     })

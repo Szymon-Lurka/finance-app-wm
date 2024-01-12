@@ -6,9 +6,13 @@ import {BodyFieldsValidationError, UnauthorizedError, ValidationError} from "../
 import {PASSWORD_VALIDATION_REGEX} from "../constants/regexes";
 import errors from "../constants/errors";
 import bcrypt from "bcryptjs";
-import dayjs from "dayjs";
 import {getNow} from "../utils/date/DateUtils";
 
+
+const getTotalBalance = async(req: CustomRequest, res: Response, next: NextFunction) => {
+    const userID = req.user.id;
+   // TODO if necessary
+};
 const updateUser = async (req: CustomRequest<{}, ManageUserBody>, res: Response, next: NextFunction) => {
     const {firstName, lastName, newPassword, repeatPassword, username, currentPassword} = req.body;
     if (newPassword) {
@@ -66,5 +70,6 @@ const updateUser = async (req: CustomRequest<{}, ManageUserBody>, res: Response,
 }
 
 export {
-    updateUser
+    updateUser,
+    getTotalBalance,
 }
