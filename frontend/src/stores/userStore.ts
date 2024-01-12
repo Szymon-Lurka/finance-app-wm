@@ -19,7 +19,7 @@ const useUserStore = defineStore('user', {
         async fetchBalance() {
             try {
                 const {data} = await userService.getBalance();
-                this.balance = data.data.balance;
+                this.balance = data.balance;
             } catch (error) {
                 console.log(error)
             }

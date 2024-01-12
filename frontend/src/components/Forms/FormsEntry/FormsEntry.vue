@@ -84,7 +84,7 @@ export default defineComponent({
             values: {
               name,
               description,
-              date,
+              date: dayjs(date).format('MM/DD/YYYY'),
               amount,
               type
             }
@@ -114,22 +114,41 @@ export default defineComponent({
       showErrors.value = true;
       handleSubmit(async ({name, description, date, type, amount}) => {
         try {
-          const payload = {name, description, date: dayjs(date).format('MM/DD/YYYY'), type, amount};
+          const payload = {name, description, date: dayjs(date).toISOString(), type, amount};
           deleteUntouchedFields(payload, fields);
-          const goodPayload = {...payload, categoryId: categoryIdRef.value}
+          let goodPayload: {
+            name: string;
+            description: string;
+            date: string;
+            type: string;
+            amount: number;
+            categoryId?: string;
+          } = {...payload};
+          if (isCategorySelectDirty.value) {
+            goodPayload = {...goodPayload, categoryId: categoryIdRef.value}
+          }
           if (isEditing) {
             await financialEntriesService.editEntry(props.id, goodPayload);
           } else {
             await financialEntriesService.addEntry(goodPayload);
           }
           emit('changed');
-          dispatchSuccessToast({title: lang.entries.titles[getProperFieldName()], details: lang.entries.success.details[getProperFieldName()]})
+          dispatchSuccessToast({
+            title: lang.entries.titles[getProperFieldName()],
+            details: lang.entries.success.details[getProperFieldName()]
+          })
         } catch (e) {
           console.log(e);
           if (e.response.data?.isDuplicates) {
-            dispatchErrorToast({title: lang.entries.titles[getProperFieldName()], details: lang.entries.error.details.exists})
+            dispatchErrorToast({
+              title: lang.entries.titles[getProperFieldName()],
+              details: lang.entries.error.details.exists
+            })
           } else {
-            dispatchErrorToast({title: lang.entries.titles[getProperFieldName()], details: lang.entries.error.details[getProperFieldName()]})
+            dispatchErrorToast({
+              title: lang.entries.titles[getProperFieldName()],
+              details: lang.entries.error.details[getProperFieldName()]
+            })
           }
         }
       })()
