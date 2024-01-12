@@ -1,16 +1,16 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { useField, useForm } from 'vee-validate';
-import { object, string } from 'yup';
-import { useAuthStore } from '@/stores/authStore';
-import { useRouter } from 'vue-router';
-import { useToastsService } from '@/composables/toasts';
-import { lang } from '@/constants/lang';
+import {defineComponent} from 'vue';
+import {useField, useForm} from 'vee-validate';
+import {object, string} from 'yup';
+import {useAuthStore} from '@/stores/authStore';
+import {useRouter} from 'vue-router';
+import {useToastsService} from '@/composables/toasts';
+import {lang} from '@/constants/lang';
 
 export default defineComponent({
   setup() {
     const router = useRouter();
-    const { dispatchErrorToast } = useToastsService();
+    const {dispatchErrorToast, dispatchSuccessToast} = useToastsService();
     const {
       values: login,
       handleSubmit,
@@ -18,8 +18,8 @@ export default defineComponent({
     } = useForm({
       validationSchema: object({
         email: string()
-          .required(lang.validation.nameRequired('Email'))
-          .email(lang.validation.email),
+            .required(lang.validation.nameRequired('Email'))
+            .email(lang.validation.email),
       }),
       initialValues: {
         email: '',
@@ -31,9 +31,14 @@ export default defineComponent({
     const authStore = useAuthStore();
 
     const onSubmit = () => {
-      handleSubmit(async ({ email }) => {
+      handleSubmit(async ({email}) => {
         try {
-          await authStore.forgotPassword({ email });
+          await authStore.forgotPassword({email});
+          dispatchSuccessToast({
+            title: lang.auth.titles.forgotPassword,
+            details: lang.auth.success.details.forgotPassword
+          });
+          goToLogin();
         } catch (e) {
           console.log(e);
           if (e.response.status === 400 || e.response.status === 404) {
@@ -69,7 +74,7 @@ export default defineComponent({
         <div class="form-group">
           <div class="form-field">
             <label for="email">Email</label>
-            <InputText v-model="login.email" type="text" name="email" id="email" />
+            <InputText v-model="login.email" type="text" name="email" id="email"/>
             <p></p>
           </div>
           <Button type="submit">Przypomnij hasło</Button>

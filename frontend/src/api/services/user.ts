@@ -12,7 +12,7 @@ const userService = {
         return axiosInstance.patch('/api/v1/user', payload);
     },
     resetUser: (payload: ResetUSerPayload) => {
-        return axiosInstance.patch('/api/v1/user', payload);
+        return axiosInstance.patch('/api/v1/auth/reset-password', payload);
     }
 }
 

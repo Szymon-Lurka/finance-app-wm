@@ -46,7 +46,8 @@ const lang = {
         },
         success: {
             details: {
-                register: 'Pomyślnie utworzono konto'
+                register: 'Pomyślnie utworzono konto',
+                forgotPassword: 'Wysłano email z linkiem do zmiany hasła'
             }
         }
     },

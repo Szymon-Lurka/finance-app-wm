@@ -7,16 +7,19 @@ import { userService } from '@/api/services/user';
 import { PASSWORD_VALIDATION_REGEX } from '@/constants/regexes';
 import { useToastsService } from '@/composables/toasts';
 import { lang } from '@/constants/lang';
+import {useRoute, useRouter} from "vue-router";
 
 export default defineComponent({
   setup() {
     const showErrors = ref(false);
     const { dispatchErrorToast, dispatchSuccessToast } = useToastsService();
+    const router = useRouter();
+    const route = useRoute();
+    const token = route.params.TOKEN;
     const {
       values: passwordData,
       handleSubmit: handlePasswordSubmit,
       errors: passwordErrors,
-      resetForm,
     } = useForm({
       validationSchema: object({
         newPassword: string()
@@ -39,18 +42,12 @@ export default defineComponent({
       showErrors.value = true;
       handlePasswordSubmit(async ({ newPassword, repeatPassword }) => {
         try {
-          await userService.resetUser({ newPassword, repeatPassword });
+          await userService.resetUser({ newPassword, repeatPassword, token });
           dispatchSuccessToast({
             title: lang.user.titles.updatePassword,
             details: lang.user.success.details.updatePassword,
           });
-          resetForm({
-            values: {
-              repeatPassword: null,
-              newPassword: null,
-            },
-          });
-          showErrors.value = false;
+          await router.push('/auth/login');
         } catch (e) {
           console.log(e);
           dispatchErrorToast({
