@@ -232,13 +232,13 @@ export default defineComponent({
 
     <div class="col-12 lg:col-6 xl:col-6">
       <div class="card card-chart">
-        <h2>Dochody</h2>
+        <h2>Bilans procentowy</h2>
         <Chart type="pie" :data="diffEntries" :options="percentageOptions"/>
       </div>
     </div>
     <div class="col-12 lg:col-6 xl:col-6">
       <div class="card card-chart">
-        <h2>Dochody w kategoriach</h2>
+        <h2>Bilans procentowy kategorii</h2>
         <Chart type="pie" :data="categoriesAmounts" :options="percentageOptions"/>
       </div>
     </div>

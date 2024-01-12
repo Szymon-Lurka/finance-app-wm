@@ -57,7 +57,7 @@ export default defineComponent({
           value: ''
         }
       }
-      console.log(x);
+      paginationDetails.value = {...defaultPagination};
       fetchFinancialEntries(false)
     })
     const fetchFinancialEntries = async (fetchBalance = true, resetSort = true) => {
