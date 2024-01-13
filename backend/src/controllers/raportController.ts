@@ -7,23 +7,24 @@ import FinancialEntry from "../models/FinancialEntry";
 
 const getBalance = async (req: CustomRequest<{}, {}, RaportsBalanceQuery>, res: Response, next: NextFunction) => {
     const userID = req.user.id;
-    const {dateFrom = dayjs().subtract(7, 'd'), dateTo = dayjs(), type} = req.query;
-    console.log(dayjs(dateFrom).toISOString());
+    const {dateFrom, dateTo, type} = req.query;
     const matchStage = {
         $match: {
             $and: [
                 {
                     userId: new mongoose.Types.ObjectId(userID),
                 },
-                {
-                    date: {$gte: dayjs(dateFrom).toISOString()},
-                },
-                {
-                    date: {$lte: dayjs(dateTo).toISOString()}
-                },
+                dateFrom ? {date: {$gte: dayjs(dateFrom).toISOString()}} : {},
+                dateTo ? {date: {$lte: dayjs(dateTo).toISOString()}} : {},
                 type ? {type} : {}
             ],
         }
+    }
+    if (dateFrom) {
+        matchStage.$match.$and.push({})
+    }
+    if (dateTo) {
+        matchStage.$match.$and.push({})
     }
 
     const aggregationPipeline = [
@@ -78,7 +79,8 @@ const getBalance = async (req: CustomRequest<{}, {}, RaportsBalanceQuery>, res: 
                         $group: {
                             _id: {
                                 type: '$type',
-                                category: '$categories.name'
+                                category: '$categories.name',
+                                color: '$categories.color'
                             },
                             totalAmount: {$sum: '$amount'}
                         }
@@ -126,7 +128,15 @@ const getBalance = async (req: CustomRequest<{}, {}, RaportsBalanceQuery>, res: 
     ];
 
     const [result] = await FinancialEntry.aggregate(aggregationPipeline);
-    const {results, sumAmount, categoriesAmounts, categoriesExpenseIncome, categoriesDates, categoriesTotalIncomeExpense, diffEntries} = result;
+    const {
+        results,
+        sumAmount,
+        categoriesAmounts,
+        categoriesExpenseIncome,
+        categoriesDates,
+        categoriesTotalIncomeExpense,
+        diffEntries
+    } = result;
     const totalAmount = sumAmount.length > 0 ? sumAmount[0].totalAmount : 0;
     const entries = results;
 
