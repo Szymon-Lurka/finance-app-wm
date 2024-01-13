@@ -66,21 +66,33 @@ export default defineComponent({
     const onSubmit = () => {
       showErrors.value = true;
       handleSubmit(async ({name, description, color}) => {
+        console.log(color);
+        const parsedColor = color.includes('#') ? color : `#${color}`;
         try {
-          const payload = {name, description, color: `#${color}`};
+          const payload = {name, description, color: parsedColor};
           if (isEditing) {
             await categoriesService.editCategory(props.id, payload);
           } else {
             await categoriesService.addCategory(payload);
           }
           emit('changed');
-          dispatchSuccessToast({title: lang.categories.titles[getProperFieldName()], timeMS: 3000, details: lang.categories.success.details[getProperFieldName()]})
+          dispatchSuccessToast({
+            title: lang.categories.titles[getProperFieldName()],
+            timeMS: 3000,
+            details: lang.categories.success.details[getProperFieldName()]
+          })
         } catch (e) {
           console.log(e);
           if (e.response.data?.isDuplicates) {
-            dispatchErrorToast({title: lang.categories.titles[getProperFieldName()], details: lang.categories.error.details.exists})
+            dispatchErrorToast({
+              title: lang.categories.titles[getProperFieldName()],
+              details: lang.categories.error.details.exists
+            })
           } else {
-            dispatchErrorToast({title: lang.categories.titles[getProperFieldName()], details: lang.categories.error.details[getProperFieldName()]})
+            dispatchErrorToast({
+              title: lang.categories.titles[getProperFieldName()],
+              details: lang.categories.error.details[getProperFieldName()]
+            })
           }
         }
       })()
