@@ -215,8 +215,6 @@ export default defineComponent({
         categoriesExpenseIncome.value = prepareCategoriesExpenseIncome(data.categoriesExpenseIncome || []);
         categoriesDates.value = prepareCategoriesDates(data.categoriesDates || []);
         categoriesAmounts.value = prepareCategoriesAmount(data.categoriesAmounts || []);
-        console.log(categoriesExpenseIncome.value);
-        console.log(categoriesDates.value);
       } catch (e) {
         console.log(e);
       }

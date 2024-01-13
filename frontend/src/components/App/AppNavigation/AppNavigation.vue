@@ -33,15 +33,18 @@ export default defineComponent({
 
 <template>
   <ul class="layout-menu">
+    <li @click="itemClick('home')">
+      <Button>Podsumowanie</Button>
+    </li>
     <li @click="itemClick('categories')">
-      <Button badge="XD">Kategorie</Button>
+      <Button>Kategorie</Button>
     </li>
     <li @click="itemClick('entries')">
-      <Button badge="XD">Wpisy</Button>
+      <Button>Wpisy</Button>
     </li>
-    <li @click="itemClick('raports')">
-      <Button>Raporty</Button>
-    </li>
+    <!--    <li @click="itemClick('raports')">-->
+    <!--      <Button>Raporty</Button>-->
+    <!--    </li>-->
   </ul>
 </template>
 <style lang="scss" scoped>
