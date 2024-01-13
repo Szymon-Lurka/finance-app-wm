@@ -19,6 +19,7 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
     (res) => res,
     async (err) => {
+        console.log('XD');
         const originalConfig = err.config;
         const authStore = useAuthStore();
 

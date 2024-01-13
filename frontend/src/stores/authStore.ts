@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getInitialAccessToken } from '@/helpers/accessTokens';
+import {getInitialAccessToken, getInitialRefreshToken} from '@/helpers/accessTokens';
 import { authService } from '@/api/services/auth';
 import { tokenService } from '@/helpers/tokenService';
 import router from '@/router';
@@ -7,6 +7,7 @@ import router from '@/router';
 const useAuthStore = defineStore('auth', {
   state: () => ({
     token: getInitialAccessToken(),
+    refreshToken: getInitialRefreshToken()
   }),
   actions: {
     async signIn({ email, password }) {
@@ -30,6 +31,7 @@ const useAuthStore = defineStore('auth', {
     },
     signOut() {
       this.token = null;
+      this.refreshToken = null;
       tokenService.clearTokens();
       router.push({ name: 'Auth' });
     },
@@ -57,7 +59,7 @@ const useAuthStore = defineStore('auth', {
     },
   },
   getters: {
-    isAuthenticated: (state) => !!state.token,
+    isAuthenticated: (state) => !!state.token || !!state.refreshToken,
   },
 });
 
