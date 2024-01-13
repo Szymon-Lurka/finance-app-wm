@@ -102,12 +102,17 @@ export default defineComponent({
       const totalSumExpense = expanseEntries.reduce((sum, entry) => sum + Math.abs(entry.totalAmount), 0);
       const totalSumIncome = incomeEntries.reduce((sum, entry) => sum + Math.abs(entry.totalAmount), 0);
 
-      const incomeDatasets = [{
-        data: incomeEntries.map((entry) => Math.round(Math.abs(entry.totalAmount / totalSumIncome) * 100))
-      }];
-      const expanseDatasets = [{
-        data: expanseEntries.map((entry) => Math.round(Math.abs(entry.totalAmount / totalSumExpense) * 100))
-      }];
+      const incomeDatasets = [{data: [], backgroundColor: []}];
+      incomeEntries.forEach((entry) => {
+        incomeDatasets[0].data.push(Math.round(Math.abs(entry.totalAmount / totalSumExpense) * 100)),
+            incomeDatasets[0].backgroundColor.push(entry._id.color)
+      })
+
+      const expanseDatasets = [{data: [], backgroundColor: []}];
+      expanseEntries.forEach((entry) => {
+        expanseDatasets[0].data.push(Math.round(Math.abs(entry.totalAmount / totalSumExpense) * 100)),
+            expanseDatasets[0].backgroundColor.push(entry._id.color)
+      })
 
       const expensesBarDataset = [{
         label: 'Wydatki',
