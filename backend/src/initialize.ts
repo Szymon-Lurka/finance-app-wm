@@ -14,7 +14,7 @@ const initializeApp = () => {
     connectToDB();
 
     const limiter = rateLimit({
-        limit: 20000,
+        limit: 1000,
         windowMs: 5 * 60 * 1000,
         standardHeaders: 'draft-7',
         legacyHeaders: false,
@@ -28,7 +28,7 @@ const initializeApp = () => {
     }));
 
     app.use(cors({
-        origin: '*'
+        origin: process.env.CLIENT_URL
     }));
 
     if (process.env.NODE_ENV === 'development') {

@@ -142,7 +142,9 @@ const resetPassword = async (
     decodeJWT(token);
 
     // Everything is ok, so we're saving new password and deleting resetPasswordToken
+
     user.password = await bcrypt.hash(newPassword, 10);
+
     user.resetPasswordToken = null;
     user.updatedAt = getNow();
     await user.save();
