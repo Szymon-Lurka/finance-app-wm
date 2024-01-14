@@ -99,7 +99,6 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      console.log(props.id);
       if (isEditing) await fetchCategory();
     })
 

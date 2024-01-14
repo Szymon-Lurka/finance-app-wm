@@ -5,7 +5,7 @@ import type { LoginPayload } from '@/types/models/Auth';
 
 const authService = {
   login: (payload: LoginPayload) => {
-    return axiosInstance.post<{ test: string }>('/api/v1/auth/login', {
+    return axiosInstance.post('/api/v1/auth/login', {
       email: payload.email,
       password: payload.password,
     });

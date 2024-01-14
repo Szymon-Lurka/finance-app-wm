@@ -4,6 +4,12 @@ import {raportsService} from '@/api/services/raports';
 import dayjs from "dayjs";
 import {formatAmount} from "@/helpers/formatAmount";
 
+interface CEntry {
+  _id: string;
+  totalIncome: number;
+  totalExpense: number;
+}
+
 export default defineComponent({
   setup() {
     const totalAmount = ref(0);
@@ -53,7 +59,9 @@ export default defineComponent({
       }
     };
 
-    const prepareCategoriesTotalIncomeExpense = (cEntries) => {
+
+
+    const prepareCategoriesTotalIncomeExpense = (cEntries: CEntry[]) => {
       return {
         labels: cEntries.map((entry) => entry._id),
         datasets: [
@@ -104,7 +112,7 @@ export default defineComponent({
 
       const incomeDatasets = [{data: [], backgroundColor: []}];
       incomeEntries.forEach((entry) => {
-        incomeDatasets[0].data.push(Math.round(Math.abs(entry.totalAmount / totalSumExpense) * 100)),
+        incomeDatasets[0].data.push(Math.round(Math.abs(entry.totalAmount / totalSumIncome) * 100)),
             incomeDatasets[0].backgroundColor.push(entry._id.color)
       })
 

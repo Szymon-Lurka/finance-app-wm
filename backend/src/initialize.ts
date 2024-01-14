@@ -6,12 +6,15 @@ import cors from "cors";
 import morgan from "morgan";
 import connectToDB from "./db/db";
 import {rateLimit} from 'express-rate-limit';
+// @ts-ignore
+import xssClean from 'xss-clean';
 
 dotenv.config();
 
 const initializeApp = () => {
     const app = express();
     connectToDB();
+    app.use(xssClean());
 
     const limiter = rateLimit({
         limit: 1000,

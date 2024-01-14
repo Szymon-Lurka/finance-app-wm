@@ -30,7 +30,6 @@ import TriStateCheckbox from "primevue/tristatecheckbox";
 import SelectButton from "primevue/selectbutton";
 
 const app = createApp(App);
-
 app.component('Button', Button);
 app.component('InputText', InputText);
 app.component('Badge', Badge);

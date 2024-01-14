@@ -3,13 +3,15 @@ import jwt from 'jsonwebtoken';
 import User from "../../models/User";
 import {IUser} from "../../types/models/User";
 
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || '';
+
 const createResetPasswordToken = (email: string) => jwt.sign({email}, process.env.JWT_SECRET_KEY || '', {expiresIn: process.env.RESET_PASSWORD_EXPIRES_IN});
 const signToken = (id: string) =>
     jwt.sign({id}, process.env.JWT_SECRET_KEY || '', {
         expiresIn: process.env.JWT_EXPIRES_IN
     });
 
-const signRefreshToken = (id: string) => jwt.sign({id}, process.env.JWT_SECRET_KEY || '', {
+const signRefreshToken = (id: string) => jwt.sign({id}, JWT_SECRET_KEY, {
     expiresIn: process.env.REFRESH_EXPIRES_IN
 });
 
