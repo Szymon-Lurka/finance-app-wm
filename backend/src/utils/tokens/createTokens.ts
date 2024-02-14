@@ -2,8 +2,10 @@ import {Response} from "express";
 import jwt from 'jsonwebtoken';
 import User from "../../models/User";
 import {IUser} from "../../types/models/User";
+import dotenv from "dotenv";
 
-const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || '';
+dotenv.config();
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || 'x';
 
 const createResetPasswordToken = (email: string) => jwt.sign({email}, process.env.JWT_SECRET_KEY || '', {expiresIn: process.env.RESET_PASSWORD_EXPIRES_IN});
 const signToken = (id: string) =>
